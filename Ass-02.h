@@ -16,11 +16,24 @@
 #include "touch_panel.h"
 #include "main.h"
 #else
-#include <windows.h>
+
+#if WINNT
+#include <windows.h>//EDIT
 #endif
+
 #include <stdio.h>
 #include <stdint.h>
-#include <malloc.h>
+
+#if WINNT
+#include <malloc.h>//EDIT
+#endif
+
+#if MAC
+#include <sys/malloc.h>//EDIT
+#endif
+
+#endif
+
 #include <string.h>
 
 // Assignment and version strings
