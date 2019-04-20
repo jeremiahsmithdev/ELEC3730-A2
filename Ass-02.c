@@ -10,33 +10,34 @@
 // REPLACE THE EXAMPLE CODE WITH YOUR CODE 
 //
 
-void
-Ass_02_Main (void)
-{
-#ifdef STM32F407xx
-  uint16_t i = 0;
-#endif
+void Ass_02_Main (void){
 
-  // Initialise
-  CommandLineParserInit ();
-#ifdef STM32F407xx
-  CalculatorInit ();
-#endif
+	#ifdef STM32F407xx
+		uint16_t i = 0;
+	#endif
 
-  // Loop indefinitely
-  while (1)
-  {
-    CommandLineParserProcess ();
-#ifdef STM32F407xx
-    CalculatorProcess ();
-#endif
+	CommandLineParserInit ();
 
-#ifdef STM32F407xx
-    if (i++ > 10000)
-    {
-      HAL_GPIO_TogglePin (GPIOD, LD3_Pin); // Toggle LED3
-      i = 0;
-    }
-#endif
-  }
+	#ifdef STM32F407xx
+		//CalculatorInit ();
+	#endif
+
+	// Loop indefinitely
+	while (1){
+
+		CommandLineParserProcess ();
+
+		#ifdef STM32F407xx
+			// CalculatorProcess ();
+		#endif
+
+		#ifdef STM32F407xx
+
+			if (i++ > 10000){
+				HAL_GPIO_TogglePin (GPIOD, LD3_Pin); // Toggle LED3
+				i = 0;
+			}
+
+		#endif
+	}
 }
