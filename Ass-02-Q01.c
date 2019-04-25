@@ -13,8 +13,16 @@
 #define MAX_STR_LEN 100		// Maximum characters in the input string
 #define CR 13				// Carriage return character
 
-void serial_string_parser(char**,int*);
+/* void serial_string_parser(char**,int*); */
+void serial_string_parser(void);
 int string_parser(char *inp, char **array_of_words_p[]);
+
+int main()
+{
+	CommandLineParserInit();
+	while(1)
+		CommandLineParserProcess();
+}
 
 void CommandLineParserInit (void){
 
@@ -42,57 +50,60 @@ void CommandLineParserProcess (void){
 
 	//Do the string command handling here.
 		//Build some function to handle things.
-
-
-
-
-
-
-
-
-
-
+		//
 	//If macro is incorrect.
 	#else
 
-	  int c;
 
-	  c = getchar();
-	  if (c<0)
-	  {
-		printf("INFO: Exiting program.\n");
-		exit(0);
-	  }
-	  printf("SERIAL: Got ");
-	  if ((c<32) | (c>126))
-	  {
-		printf("ASCII %d\n", c);
-	  }
-	  else
-	  {
-		printf("character '%c'\n", c);
-	  }
+	  /* int c; */
+	  /* char* word; */
+          /*  */
+	  /* word = "string"; */
+	  /* word += c; */
+	  /* printf("word = '%s'\n", word); */
+          /*  */
+	  /* c = getchar(); */
+	  /* if (c<0) */
+	  /* { */
+		/* printf("INFO: Exiting program.\n"); */
+		/* exit(0); */
+	  /* } */
+	  /* printf("SERIAL: Got "); */
+	  /* if ((c<32) | (c>126)) */
+	  /* { */
+		/* printf("ASCII %d\n", c); */
+	  /* } */
+	  /* else */
+	  /* { */
+		/* printf("character '%c'\n", c); */
+	  /* } */
+	/* serial_string_parser(arrayOfWords, count); */
+	char** arrayOfWords = NULL;			//This will hold the parsed inputs, broken into words.
+	int* count;
+	count = 0;
+	/* serial_string_parser(arrayOfWords, count);			//This will echo the input and populate the arrayOfWords. */
+	serial_string_parser();
+	printf("The array of words is:");
+	for (int i = 0; i < sizeof(arrayOfWords); i++)
+	{
+		printf("%s", arrayOfWords[i]);
+	}
+	printf("worddddddddd");
 
 #endif
 }
-
-
-
-
-
-
-
-/* This function is Q5 of A1 */
-void serial_string_parser(char** array_of_words, int* count) {
+void serial_string_parser(void) {
   char c;
   int i, j;
   char command_line[MAX_STR_LEN + 1];
+  char **array_of_words;
+  int count;
 
   // Get one line of input
-  printf("\n\nEnter text:\n");
+  printf("--> Enter text:\n");
   i = 0;
   c = getchar();
-  while (c != CR && i < MAX_STR_LEN) {
+  while (c != '\n' && i < MAX_STR_LEN) {
     printf("%c", c);
     if (c < ' ')
       printf("[0x%02x]", c);
@@ -103,15 +114,34 @@ void serial_string_parser(char** array_of_words, int* count) {
   command_line[i] = 0;
 
   // Parse the input and print result
-  *count = string_parser(command_line, &array_of_words);						//This will handle all of the actual parsing.
-  printf("\n\nCount    : %d\n", *count);
-  for (j = 0; j < *count; j++) {
-    printf("Word(%d)  : %s\n", j + 1, (array_of_words)[j]);
+  count = string_parser(command_line, &array_of_words);
+  printf("\n--> count = %d\n", count);
+  for (j = 0; j < count; j++) {
+    printf("---> %2d: '%s'\n", j + 1, (array_of_words)[j]);
+// ~~~ operations
+    if (j == 2)
+    {
+	    float one = strtof(array_of_words[1], NULL);
+	    float two = strtof(array_of_words[2], NULL);
+
+	    float result = -1;
+	    if (strcmp(array_of_words[0], "add") == 0)
+		    result = one + two;
+
+	    if (strcmp(array_of_words[0], "div") == 0)
+		    result = one / two;
+
+	    if (strcmp(array_of_words[0], "mul") == 0)
+		    result = one * two;
+	    printf("\n Result of operation is: %f\n", result);
+	    // ~~~ operations ^
+    }
   }
-  if (*count != 0) {
+  if (count != 0) {
     free(array_of_words[0]);
     free(array_of_words);
   }
+
 }
 
 
