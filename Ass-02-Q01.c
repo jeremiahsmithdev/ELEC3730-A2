@@ -30,9 +30,9 @@ void CommandLineParserProcess (void){
 
 #ifdef STM32F407xx
 	char** arrayOfWords = NULL;			//This will hold the parsed inputs, broken into words.
-	int* count;
+	int count = 0;
 	count = 0;
-	serial_string_parser(arrayOfWords, count);			//This will echo the input and populate the arrayOfWords.
+	serial_string_parser(arrayOfWords, &count);			//This will echo the input and populate the arrayOfWords.
 
 
 
@@ -105,7 +105,7 @@ void serial_string_parser(char** array_of_words, int* count) {
 
   // Parse the input and print result
   *count = string_parser(command_line, &array_of_words);						//This will handle all of the actual parsing.
-  printf("\n\nCount    : %d\n", *count);
+  printf("\n\nCount    : %d\n", *count);	/* COUNT IS NOT COMING BACK CORRECTLY */
   for (j = 0; j < *count; j++) {
     printf("Word(%d)  : %s\n", j + 1, (array_of_words)[j]);
   }
