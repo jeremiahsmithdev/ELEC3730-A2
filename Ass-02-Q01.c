@@ -30,33 +30,6 @@ void CommandLineParserInit (void){
 void CommandLineParserProcess (void){
 
 #ifdef STM32F407xx
-	char** arrayOfWords = NULL;			//This will hold the parsed inputs, broken into words.
-	int count = 0;
-	count = 0;
-	serial_string_parser(arrayOfWords, &count);			//This will echo the input and populate the arrayOfWords.
-
-
-
-	//Do a check that things went correctly by doing a loop through ArrayOfWords and printing.
-
-	//printf("\n\n The number of words is: %d", *count);
-
-
-	//Do the string command handling here.
-	//Build some function to handle things.
-
-
-
-
-
-
-
-
-
-
-	//If macro is incorrect.
-	#else
-
 	 char** arrayOfWords = 0;			//This will hold the parsed inputs, broken into words.
 	 int count = 0;
 	 char c;
@@ -68,10 +41,10 @@ void CommandLineParserProcess (void){
 	   i = 0;
 	   c = getchar();
 
-	   while (c != CR && i < MAX_STR_LEN ){// && c != NL) {          // Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
+	   while (c != CR && i < MAX_STR_LEN) {          // Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
 	     printf("%c", c);								 // [0x0a] is ugly as shit.
 	     if (c < ' ') printf("[0x%02x]", c);
-	     command_line[i] = c;
+	     if (c != NL) command_line[i] = c;
 	     i++;
 	     c = getchar();
 	   }
@@ -80,31 +53,31 @@ void CommandLineParserProcess (void){
 	   // Parse the input and print result
 	   count = string_parser(command_line, &arrayOfWords);						//This will handle all of the actual parsing.
 	   printf("\nCount    : %d\n", count);
-	   for (j = 0; j < count; j++) {
-	     printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
+
+	   if(count != 0 ){
+
+		   for (j = 0; j < count; j++) {
+		  	     printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
+		   }
+
+		   if(strcmp(arrayOfWords[0],"add") == 0 ){				//add
+			   printf("\n\n ADD\n");
+		   } else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
+			   printf("\n\n SUB\n");
+		   } else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
+			   printf("\n\n MUL\n");
+		   } else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
+			   printf("\n\n DIV\n");
+		   }
+		   else{												//error
+			   printf("\n\n ERROR\n");
+		   }
+
+		   free(arrayOfWords[0]);
+		   free(arrayOfWords);
+
 	   }
 
-//	   printf("\n\n/*** Parsing Section ***\\");
-
-
-	   if(strcmp(arrayOfWords[0],"add") == 0 ){				//add
-		   printf("\n\n ADD\n");
-	   }
-//	   } else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
-//		   printf("\n\n SUB");
-//	   } else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
-//		   printf("\n\n MUL");
-//	   } else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
-//		   printf("\n\n DIV");
-//	   }
-//	   else{												//error
-//		   printf("\n\n ERROR");
-//	   }
-
-
-
-	    free(arrayOfWords[0]);
-	    free(arrayOfWords);
 
 
 #endif
