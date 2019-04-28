@@ -40,21 +40,16 @@ void CalculatorInit (void)
 
   /* Operations */
   BSP_LCD_SetTextColor(0xFF00);
-  BSP_LCD_FillRect (241, 49, 80, 192);	// [+, -, x, %]
+  BSP_LCD_FillRect (241, 49, 79, 192);	// [+, -, x, %]
   BSP_LCD_FillRect (161, 193, 80, 48);	// [=]
 
-  /* Clear Button [C] */
+  /* Clear Button  */
 
-  BSP_LCD_SetTextColor(0xFF00);
-  BSP_LCD_FillRect (241, 49, 80, 192);	// [+, -, x, %]
-
-  /* Characters */
-
-  BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
-  BSP_LCD_SetFont (&Font24);
-  BSP_LCD_DisplayChar (290, 205, 'C');
+  BSP_LCD_SetTextColor(0xE0A2);
+  BSP_LCD_FillRect (81, 193, 80, 48);	// [C]
 
   /* Draw Grid */
+  BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
 
   BSP_LCD_DrawHLine (0,47, 320);		//0a
   BSP_LCD_DrawHLine (0,48, 320);		//0b
@@ -75,6 +70,44 @@ void CalculatorInit (void)
   BSP_LCD_DrawVLine (240, 49, 192);		//2b
   BSP_LCD_DrawVLine (319, 49, 192);		//3a
   BSP_LCD_DrawVLine (320, 49, 192);		//3b
+
+  /** Characters **/
+
+  BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
+  BSP_LCD_SetFont (&Font24);
+
+  /* Col 0 */
+  BSP_LCD_SetBackColor(0x00FF);				//Background Color: Numbers
+  BSP_LCD_DisplayChar (32, 61, '7');
+  BSP_LCD_DisplayChar (32, 109, '4');
+  BSP_LCD_DisplayChar (32, 157, '1');
+  BSP_LCD_DisplayChar (32, 205, '0');
+
+  /* Col 1 */
+  BSP_LCD_SetBackColor(0x00FF);				//Background Color: Numbers
+  BSP_LCD_DisplayChar (114, 61, '8');
+  BSP_LCD_DisplayChar (114, 109, '5');
+  BSP_LCD_DisplayChar (114, 157, '2');
+  BSP_LCD_SetBackColor(0xE0A2);				//Background Color: Clear Button
+  BSP_LCD_DisplayChar (114, 205, 'C');
+
+  /* Col 2 */
+  BSP_LCD_SetBackColor(0x00FF);				//Background Color: Numbers
+  BSP_LCD_DisplayChar (194, 61, '9');
+  BSP_LCD_DisplayChar (194, 109, '6');
+  BSP_LCD_DisplayChar (194, 157, '3');
+  BSP_LCD_SetBackColor(0xFF00);				//Background Color: Operations
+  BSP_LCD_DisplayChar (194, 205, '=');
+
+  /* Col 3 */
+  BSP_LCD_SetBackColor(0xFF00);				//Background Color: Operations
+  BSP_LCD_DisplayChar (274, 61, '+');
+  BSP_LCD_DisplayChar (274, 109, '-');
+  BSP_LCD_DisplayChar (274, 157, 'x');
+  BSP_LCD_DisplayChar (274, 205, '%');
+
+
+
 
 
 }
