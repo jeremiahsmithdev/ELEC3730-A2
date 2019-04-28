@@ -71,23 +71,28 @@ void CommandLineParserProcess (void)
 	// Parse the input and print result
 	count = string_parser(command_line, &arrayOfWords);						//This will handle all of the actual parsing.
 	if(count != 0 ){
-
+		printf("\n");add 1
 		for (j = 0; j < count; j++) {
 			printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
 		}
+		// ~~~ operations
+		float result = 0;
+		result = strtof(arrayOfWords[1], NULL);
 
-		if(strcmp(arrayOfWords[0],"add") == 0 ){				//add
-			printf("\n\n ADD\n");
-		} else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
-			printf("\n\n SUB\n");
-		} else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
-			printf("\n\n MUL\n");
-		} else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
-			printf("\n\n DIV\n");
-		}
-		else{												//error
-			printf("\n\n ERROR\n");
-		}
+		if (strcmp(arrayOfWords[0], "add") == 0)
+			for (int i = 2; i < count; i++)
+				result += strtof(arrayOfWords[i], NULL);
+		if (strcmp(arrayOfWords[0], "sub") == 0)
+			for (int i = 2; i < count; i++)
+				result -= strtof(arrayOfWords[i], NULL);
+		if (strcmp(arrayOfWords[0], "mul") == 0)
+			for (int i = 2; i < count; i++)
+				result *= strtof(arrayOfWords[i], NULL);
+		if (strcmp(arrayOfWords[0], "div") == 0)
+			for (int i = 2; i < count; i++)
+				result /= strtof(arrayOfWords[i], NULL);
+
+		printf("Result : %g\n\n", result);
 
 		free(arrayOfWords[0]);
 		free(arrayOfWords);

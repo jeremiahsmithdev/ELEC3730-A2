@@ -10,64 +10,76 @@
 // REPLACE THE EXAMPLE CODE WITH YOUR CODE 
 //
 
-void
-CalculatorInit (void)
+void CalculatorInit (void)
 {
-  // STEPIEN: Assume horizontal display
 
   // Initialize and turn on LCD and calibrate the touch panel
   BSP_LCD_Init ();
   BSP_LCD_DisplayOn ();
   BSP_TP_Init ();
 
-  // Display welcome message
-  BSP_LCD_Clear (LCD_COLOR_WHITE);
-  BSP_LCD_SetFont (&Font12);
-  BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
-  BSP_LCD_DisplayStringAtLine (0, (uint8_t*) ASS_STRING);
-  BSP_LCD_DisplayStringAtLine (1, (uint8_t*) VER_STRING);
-  BSP_LCD_DisplayStringAtLine (2, (uint8_t*) "Calculator Example");
+//   Display welcome message											/* No Longer Required */
+   BSP_LCD_Clear (LCD_COLOR_WHITE);
+   BSP_LCD_SetFont (&Font12);
+   BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
+   BSP_LCD_DisplayStringAtLine (0, (uint8_t*) ASS_STRING);
+   BSP_LCD_DisplayStringAtLine (1, (uint8_t*) VER_STRING);
+   BSP_LCD_DisplayStringAtLine (2, (uint8_t*) "Calculator Example");
 
-  // Create colour choices
-  BSP_LCD_SetTextColor (LCD_COLOR_RED);
-  BSP_LCD_FillRect (5, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_BLUE);
-  BSP_LCD_FillRect (40, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_GREEN);
-  BSP_LCD_FillRect (75, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
-  BSP_LCD_FillRect (110, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_MAGENTA);
-  BSP_LCD_FillRect (145, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_ORANGE);
-  BSP_LCD_FillRect (180, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_CYAN);
-  BSP_LCD_FillRect (215, 200, 30, 30);
-  BSP_LCD_SetTextColor (LCD_COLOR_YELLOW);
-  BSP_LCD_FillRect (250, 200, 30, 30);
+  /* Drawing Button Boxes: Consult Spreadsheet */
+
+
+
+
+  /** Background Highlighting **/
+
+
+  /* Numbers [0-9] */
+  BSP_LCD_SetTextColor(0x00FF);
+  BSP_LCD_FillRect (0, 49, 240, 192);
+
+  /* Operations */
+  BSP_LCD_SetTextColor(0xFF00);
+  BSP_LCD_FillRect (241, 49, 80, 192);	// [+, -, x, %]
+  BSP_LCD_FillRect (161, 193, 80, 48);	// [=]
+
+  /* Clear Button [C] */
+
+  BSP_LCD_SetTextColor(0xFF00);
+  BSP_LCD_FillRect (241, 49, 80, 192);	// [+, -, x, %]
+
+  /* Characters */
 
   BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
   BSP_LCD_SetFont (&Font24);
   BSP_LCD_DisplayChar (290, 205, 'C');
-  BSP_LCD_DrawHLine (0, 196, 320);
 
-  BSP_LCD_DrawVLine (1, 198, 35);
-  BSP_LCD_DrawVLine (37, 198, 35);
-  BSP_LCD_DrawVLine (72, 198, 35);
-  BSP_LCD_DrawVLine (107, 198, 35);
-  BSP_LCD_DrawVLine (142, 198, 35);
+  /* Draw Grid */
 
-  BSP_LCD_DrawVLine (177, 198, 35);
-  BSP_LCD_DrawVLine (212, 198, 35);
-  BSP_LCD_DrawVLine (247, 198, 35);
-  BSP_LCD_DrawVLine (282, 198, 35);
-  BSP_LCD_DrawVLine (317, 198, 35);
+  BSP_LCD_DrawHLine (0,47, 320);		//0a
+  BSP_LCD_DrawHLine (0,48, 320);		//0b
+  BSP_LCD_DrawHLine (0,95, 320);		//1a
+  BSP_LCD_DrawHLine (0,96, 320);		//1b
+  BSP_LCD_DrawHLine (0,143, 320);		//2a
+  BSP_LCD_DrawHLine (0,144, 320);		//2c
+  BSP_LCD_DrawHLine (0,191, 320);		//3a
+  BSP_LCD_DrawHLine (0,192, 320);		//3b
+  BSP_LCD_DrawHLine (0,239, 320);		//4a
+  BSP_LCD_DrawHLine (0,240, 320);		//4b
 
-  BSP_LCD_DrawHLine (1, 232, 320);
+  BSP_LCD_DrawVLine (79, 49, 192);		//0a
+  BSP_LCD_DrawVLine (80, 49, 192);		//0b
+  BSP_LCD_DrawVLine (159, 49, 192);		//1a
+  BSP_LCD_DrawVLine (160, 49, 192);		//1b
+  BSP_LCD_DrawVLine (239, 49, 192);		//2a
+  BSP_LCD_DrawVLine (240, 49, 192);		//2b
+  BSP_LCD_DrawVLine (319, 49, 192);		//3a
+  BSP_LCD_DrawVLine (320, 49, 192);		//3b
+
+
 }
 
-void
-CalculatorProcess (void)
+void CalculatorProcess (void)
 {
   // STEPIEN: Assume horizontal display
 
