@@ -38,18 +38,21 @@ void CalculatorInit (void)
   BSP_LCD_SetTextColor(0x00FF);
   BSP_LCD_FillRect (0, 49, 240, 192);
 
-  /* Operations [+,-,x,%,=] */
+  /* Operations */
   BSP_LCD_SetTextColor(0xFF00);
-  BSP_LCD_FillRect (241, 49, 80, 192);
+  BSP_LCD_FillRect (241, 49, 80, 192);	// [+, -, x, %]
+  BSP_LCD_FillRect (161, 193, 80, 48);	// [=]
 
+  /* Clear Button [C] */
+
+  BSP_LCD_SetTextColor(0xFF00);
+  BSP_LCD_FillRect (241, 49, 80, 192);	// [+, -, x, %]
+
+  /* Characters */
 
   BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
   BSP_LCD_SetFont (&Font24);
   BSP_LCD_DisplayChar (290, 205, 'C');
-
-  /* Clear Button [C] */
-
-
 
   /* Draw Grid */
 

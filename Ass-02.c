@@ -19,7 +19,7 @@ void Ass_02_Main (void){
 	CommandLineParserInit ();
 
 	#ifdef STM32F407xx
-		CalculatorInit ();
+//		CalculatorInit ();
 	#endif
 
 	// Loop indefinitely
