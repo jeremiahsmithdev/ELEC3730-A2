@@ -2,11 +2,13 @@
  * TO DO
  * - Currently issues passing by reference to functions.
  * - Need to handle backspaces in the parser.
- *
- *   a) Done
- *   b) Done
- *   c)
- *   d)
+ * 
+ add <num 1> .. <num N> Sum one or more numbers.	Done
+sub <num 1> <num 2> Subtract two numbers.		Done
+mul <num 1> .. <num N> Multiply one or more numbers.	Done
+div <num 1> <num 2> Divide two numbers.			Done
+debug <on|off> Turn debug messages on or off.
+help [<command>] Display help messages.*   d)
  *
  */
 
@@ -20,6 +22,8 @@
 
 void serial_string_parser(char**,int*);
 int string_parser(char *inp, char **array_of_words_p[]);
+
+int debug = 0;
 
 int main()
 {
@@ -114,18 +118,47 @@ void CommandLineParserProcess (void)
 	float result = 0;
 	result = strtof(array_of_words[1], NULL);
 
+	/*  add <num 1> .. <num N> Sum one or more numbers. */
 	if (strcmp(array_of_words[0], "add") == 0)
 		for (int i = 2; i < count; i++)
 			result += strtof(array_of_words[i], NULL);
+
+	/* sub <num 1> <num 2> Subtract two numbers. */
 	if (strcmp(array_of_words[0], "sub") == 0)
 		for (int i = 2; i < count; i++)
 			result -= strtof(array_of_words[i], NULL);
+
+	/* mul <num 1> .. <num N> Multiply one or more numbers. */
 	if (strcmp(array_of_words[0], "mul") == 0)
 		for (int i = 2; i < count; i++)
 			result *= strtof(array_of_words[i], NULL);
+
+	/* div <num 1> <num 2> Divide two numbers.*/
 	if (strcmp(array_of_words[0], "div") == 0)
 		for (int i = 2; i < count; i++)
 			result /= strtof(array_of_words[i], NULL);
+
+	/* debug <on|off> Turn debug messages on or off. */
+	if (strcmp(array_of_words[0], "debug") == 0)
+		if (strcmp(array_of_words[1], "on"))
+			debug = 1;
+		if (strcmp(array_of_words[1], "off"))
+			debug = 0;
+	/* help [<command>] Display help messages.*   d) */
+	if (strcmp(array_of_words[0], "help") == 0)
+	{
+		if (strcmp(array_of_words[1], "add") == 0)
+			printf("Performs an addition operation on the succeeding numbers\n");
+		if (strcmp(array_of_words[1], "sub") == 0)
+			printf("Performs a subtraction operation on the succeeding numbers\n");
+		if (strcmp(array_of_words[1], "mul") == 0)
+			printf("Performs a multiplication operation on the succeeding numbers\n");
+		if (strcmp(array_of_words[1], "div") == 0)
+			printf("Performs a division operation on the succeeding numbers\n");
+		if (strcmp(array_of_words[1], "debug") == 0)
+			printf("Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
+	}
+
 
 	printf("Result : %g\n\n", result);
 
