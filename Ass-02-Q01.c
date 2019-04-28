@@ -12,14 +12,13 @@
 
 #include "Ass-02.h"
 #ifdef STM32F407xx
-#include "usart.h"
 #endif
 
 #define MAX_STR_LEN 100		// Maximum characters in the input string
 #define CR 13				// Carriage return character
+#define NL 0x0a             //New Line Feed
 
-/* void serial_string_parser(char**,int*); */
-void serial_string_parser(void);
+void serial_string_parser(char**,int*);
 int string_parser(char *inp, char **array_of_words_p[]);
 
 int main()
@@ -41,71 +40,56 @@ void CommandLineParserInit (void)
 // Check for input and echo back
 void CommandLineParserProcess (void)
 {
-	printf("start\n");
+	/* printf("start\n"); */
 
 #ifdef STM32F407xx
-	char** arrayOfWords = NULL;			//This will hold the parsed inputs, broken into words.
-	int* count;
-	count = 0;
-	// serial string parser currently handles the add, sub, mul and div
-	// operations
-	serial_string_parser(arrayOfWords, count);			//This will echo the input and populate the arrayOfWords.
-	// TODO: fix segmentation fault on function exit ^^
-	printf("serial_string_parser finish\n");
 
+	char** arrayOfWords = 0;			//This will hold the parsed inputs, broken into words.
+	int count = 0;
+	char c;
+	int i, j;
+	char command_line[MAX_STR_LEN + 1];
 
+	// Get one line of input
+	printf("\n\nEnter text:\n");
+	i = 0;
+	c = getchar();
 
-	//Do a check that things went correctly by doing a loop through ArrayOfWords and printing.
-
-	//printf("\n\n The number of words is: %d", *count);
-
-
-	//Do the string command handling here.
-	//Build some function to handle things.
-	//
-	//If macro is incorrect.
-#else
-
-
-	/* int c; */
-	/* char* word; */
-	/*  */
-	/* word = "string"; */
-	/* word += c; */
-	/* printf("word = '%s'\n", word); */
-	/*  */
-	/* c = getchar(); */
-	/* if (c<0) */
-	/* { */
-	/* printf("INFO: Exiting program.\n"); */
-	/* exit(0); */
-	/* } */
-	/* printf("SERIAL: Got "); */
-	/* if ((c<32) | (c>126)) */
-	/* { */
-	/* printf("ASCII %d\n", c); */
-	/* } */
-	/* else */
-	/* { */
-	/* printf("character '%c'\n", c); */
-	/* } */
-	/* serial_string_parser(arrayOfWords, count); */
-	char** arrayOfWords = NULL;			//This will hold the parsed inputs, broken into words.
-	int* count;
-	count = 0;
-	/* serial_string_parser(arrayOfWords, count);			//This will echo the input and populate the arrayOfWords. */
-	serial_string_parser();
-
-	printf("The array of words is:");
-	for (int i = 0; i < sizeof(arrayOfWords); i++)
-	{
-		printf("%s", arrayOfWords[i]);
+	while (c != CR && i < MAX_STR_LEN) {          // Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
+		printf("%c", c);								 // [0x0a] is ugly as shit.
+		if (c < ' ') printf("[0x%02x]", c);
+		if (c != NL) command_line[i] = c;
+		i++;
+		c = getchar();
 	}
+	command_line[i] = 0;
 
-#endif
-}
-void serial_string_parser(void)
-{
+	// Parse the input and print result
+	count = string_parser(command_line, &arrayOfWords);						//This will handle all of the actual parsing.
+	if(count != 0 ){
+
+		for (j = 0; j < count; j++) {
+			printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
+		}
+
+		if(strcmp(arrayOfWords[0],"add") == 0 ){				//add
+			printf("\n\n ADD\n");
+		} else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
+			printf("\n\n SUB\n");
+		} else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
+			printf("\n\n MUL\n");
+		} else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
+			printf("\n\n DIV\n");
+		}
+		else{												//error
+			printf("\n\n ERROR\n");
+		}
+
+		free(arrayOfWords[0]);
+		free(arrayOfWords);
+
+	}
+#else
 	char c;
 	int i, j;
 	char command_line[MAX_STR_LEN + 1];
@@ -117,9 +101,6 @@ void serial_string_parser(void)
 	i = 0;
 	c = getchar();
 	while (c != '\n' && i < MAX_STR_LEN) {
-		/* printf("%c", c); */
-		/* if (c < ' ') */
-		/* 	printf("[0x%02x]", c); */
 		command_line[i] = c;
 		i++;
 		c = getchar();
@@ -128,36 +109,63 @@ void serial_string_parser(void)
 
 	// Parse the input and print result
 	count = string_parser(command_line, &array_of_words);
-	/* printf("\n--> count = %d\n", count); */
-	for (j = 0; j < count; j++)
-	{
-		/* printf("> %2d: '%s'\n", j + 1, (array_of_words)[j]); */
-	}
 
 	// ~~~ operations
-		float result = 0;
-		result = strtof(array_of_words[1], NULL);
+	float result = 0;
+	result = strtof(array_of_words[1], NULL);
 
-		if (strcmp(array_of_words[0], "add") == 0)
-			for (int i = 2; i < count; i++)
-				result += strtof(array_of_words[i], NULL);
-		if (strcmp(array_of_words[0], "sub") == 0)
-			for (int i = 2; i < count; i++)
-				result -= strtof(array_of_words[i], NULL);
-		if (strcmp(array_of_words[0], "mul") == 0)
-			for (int i = 2; i < count; i++)
-				result *= strtof(array_of_words[i], NULL);
-		if (strcmp(array_of_words[0], "div") == 0)
-			for (int i = 2; i < count; i++)
-				result /= strtof(array_of_words[i], NULL);
+	if (strcmp(array_of_words[0], "add") == 0)
+		for (int i = 2; i < count; i++)
+			result += strtof(array_of_words[i], NULL);
+	if (strcmp(array_of_words[0], "sub") == 0)
+		for (int i = 2; i < count; i++)
+			result -= strtof(array_of_words[i], NULL);
+	if (strcmp(array_of_words[0], "mul") == 0)
+		for (int i = 2; i < count; i++)
+			result *= strtof(array_of_words[i], NULL);
+	if (strcmp(array_of_words[0], "div") == 0)
+		for (int i = 2; i < count; i++)
+			result /= strtof(array_of_words[i], NULL);
 
-		printf("Result : %g\n\n", result);
+	printf("Result : %g\n\n", result);
 
 	if (count != 0) {
 		free(array_of_words[0]);
 		free(array_of_words);
 	}
-		printf("\nend\n");
+#endif
+}
+
+/* This function is Q5 of A1 */
+void serial_string_parser(char** array_of_words, int* count) {
+	char c;
+	int i, j;
+	char command_line[MAX_STR_LEN + 1];
+
+	// Get one line of input
+	printf("\n\nEnter text:\n");
+	i = 0;
+	c = getchar();
+	while (c != CR && i < MAX_STR_LEN) {
+		printf("%c", c);
+		if (c < ' ')
+			printf("[0x%02x]", c);
+		command_line[i] = c;
+		i++;
+		c = getchar();
+	}
+	command_line[i] = 0;
+
+	// Parse the input and print result
+	*count = string_parser(command_line, &array_of_words);						//This will handle all of the actual parsing.
+	printf("\n\nCount    : %d\n", *count);	/* COUNT IS NOT COMING BACK CORRECTLY */
+	for (j = 0; j < *count; j++) {
+		printf("Word(%d)  : %s\n", j + 1, (array_of_words)[j]);
+	}
+	if (*count != 0) {
+		free(array_of_words[0]);
+		free(array_of_words);
+	}
 }
 
 
