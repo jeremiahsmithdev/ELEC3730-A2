@@ -10,9 +10,9 @@ int main(void)
 {
   // STEPIEN: Set the buffer sizes to 1 
   //
-  setvbuf(stdin, NULL, _IONBF, 0);
-  setvbuf(stdout, NULL, _IONBF, 0);
-  setvbuf(stderr, NULL, _IONBF, 0);
+  setvbuf(stdin, 0, _IONBF, 0);
+  setvbuf(stdout, 0, _IONBF, 0);
+  setvbuf(stderr, 0, _IONBF, 0);
 
   Ass_02_Main();
 }

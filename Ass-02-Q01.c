@@ -13,6 +13,7 @@
 
 #define MAX_STR_LEN 100		// Maximum characters in the input string
 #define CR 13				// Carriage return character
+#define NL 0x0a             //New Line Feed
 
 void serial_string_parser(char**,int*);
 int string_parser(char *inp, char **array_of_words_p[]);
@@ -42,7 +43,7 @@ void CommandLineParserProcess (void){
 
 
 	//Do the string command handling here.
-		//Build some function to handle things.
+	//Build some function to handle things.
 
 
 
@@ -56,23 +57,55 @@ void CommandLineParserProcess (void){
 	//If macro is incorrect.
 	#else
 
-	  int c;
+	 char** arrayOfWords = 0;			//This will hold the parsed inputs, broken into words.
+	 int count = 0;
+	 char c;
+	 int i, j;
+	 char command_line[MAX_STR_LEN + 1];
 
-	  c = getchar();
-	  if (c<0)
-	  {
-		printf("INFO: Exiting program.\n");
-		exit(0);
-	  }
-	  printf("SERIAL: Got ");
-	  if ((c<32) | (c>126))
-	  {
-		printf("ASCII %d\n", c);
-	  }
-	  else
-	  {
-		printf("character '%c'\n", c);
-	  }
+	   // Get one line of input
+	   printf("\n\nEnter text:\n");
+	   i = 0;
+	   c = getchar();
+        printf("\n\n");
+	   while (c != CR && i < MAX_STR_LEN && c != NL) {          //Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
+	     printf("%c", c);
+	     if (c < ' ')
+	       printf("[0x%02x]", c);
+	     command_line[i] = c;
+	     i++;
+	     c = getchar();
+	   }
+	   command_line[i] = 0;
+
+	   // Parse the input and print result
+	   count = string_parser(command_line, &arrayOfWords);						//This will handle all of the actual parsing.
+	   printf("\n\nCount    : %d\n", count);
+	   for (j = 0; j < count; j++) {
+	     printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
+	   }
+
+//	   printf("\n\n/*** Parsing Section ***\\");
+
+
+	   if(strcmp(arrayOfWords[0],"add") == 0 ){				//add
+		   printf("\n\n ADD");
+	   } else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
+		   printf("\n\n SUB");
+	   } else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
+		   printf("\n\n MUL");
+	   } else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
+		   printf("\n\n DIV");
+	   }
+	   else{												//error
+		   printf("\n\n ERROR");
+	   }
+
+
+
+	    free(arrayOfWords[0]);
+	    free(arrayOfWords);
+
 
 #endif
 }
