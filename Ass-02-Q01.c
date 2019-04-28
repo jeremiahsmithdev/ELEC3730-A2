@@ -67,11 +67,10 @@ void CommandLineParserProcess (void){
 	   printf("\n\nEnter text:\n");
 	   i = 0;
 	   c = getchar();
-        printf("\n\n");
-	   while (c != CR && i < MAX_STR_LEN && c != NL) {          //Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
-	     printf("%c", c);
-	     if (c < ' ')
-	       printf("[0x%02x]", c);
+
+	   while (c != CR && i < MAX_STR_LEN ){// && c != NL) {          // Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
+	     printf("%c", c);								 // [0x0a] is ugly as shit.
+	     if (c < ' ') printf("[0x%02x]", c);
 	     command_line[i] = c;
 	     i++;
 	     c = getchar();
@@ -80,7 +79,7 @@ void CommandLineParserProcess (void){
 
 	   // Parse the input and print result
 	   count = string_parser(command_line, &arrayOfWords);						//This will handle all of the actual parsing.
-	   printf("\n\nCount    : %d\n", count);
+	   printf("\nCount    : %d\n", count);
 	   for (j = 0; j < count; j++) {
 	     printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
 	   }
@@ -89,17 +88,18 @@ void CommandLineParserProcess (void){
 
 
 	   if(strcmp(arrayOfWords[0],"add") == 0 ){				//add
-		   printf("\n\n ADD");
-	   } else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
-		   printf("\n\n SUB");
-	   } else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
-		   printf("\n\n MUL");
-	   } else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
-		   printf("\n\n DIV");
+		   printf("\n\n ADD\n");
 	   }
-	   else{												//error
-		   printf("\n\n ERROR");
-	   }
+//	   } else if(strcmp(arrayOfWords[0],"sub") == 0 ){		//sub
+//		   printf("\n\n SUB");
+//	   } else if(strcmp(arrayOfWords[0],"mul") == 0 ){		//mul
+//		   printf("\n\n MUL");
+//	   } else if(strcmp(arrayOfWords[0],"div") == 0 ){		//div
+//		   printf("\n\n DIV");
+//	   }
+//	   else{												//error
+//		   printf("\n\n ERROR");
+//	   }
 
 
 
