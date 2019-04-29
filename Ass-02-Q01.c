@@ -72,10 +72,10 @@ void CommandLineParserProcess (void)
 	// Parse the input and print result
 	count = string_parser(command_line, &arrayOfWords);						//This will handle all of the actual parsing.
 	if(count != 0 ){
-		printf("\n");add 1
-			for (j = 0; j < count; j++) {
-				printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
-			}
+		printf("\n");
+		for (j = 0; j < count; j++) {
+			printf("Word(%d)  : %s\n", j + 1, (arrayOfWords)[j]);
+		}
 		// ~~~ operations
 		float result = 0;
 		result = strtof(arrayOfWords[1], NULL);
