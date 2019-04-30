@@ -69,38 +69,45 @@ static void displayError(){
 	char* error = "Max Char";
 	uint8_t UCharError = (uint8_t)*error;
 
+	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
+	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
+	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
-	ClearTextBox();														//Clear Display
+
 	BSP_LCD_DisplayStringAt(15,13,"Max Char Reached",LEFT_MODE); 		//Display Error
 	HAL_Delay(1000);
-	ClearTextBox();														//Clear Display
-	BSP_LCD_DisplayStringAt(15,13,mathString,LEFT_MODE);				//Display Expression
+
+	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
+	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
+	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
+
+	BSP_LCD_DisplayStringAt(15,13,&mathString,LEFT_MODE);				//Display Expression
 
 }
 
 /* Update strings and display. */
 static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTED.
 
-	if((mathStrLen) > MAX_MATH_STR){															//Calculates length based on characters up to but not including null.
+	char* displayPointer;					//Points to beginning of portion of expression.
 
-		displayError(mathString);
+	if((mathStrLen) > MAX_MATH_STR){		//If max expression length exceeded.
+
+		displayError();					 	// Display error message in text box.
 
 	}else{
+
 		//concatenate character onto expression.
 		printf("A. MathString: %s Length: %d \n",&mathString, mathStrLen);
 		strcat(&mathString,theChar);
 
-		(mathStrLen)++;
+		mathStrLen++;
+		displayPointer = (&mathString + (mathStrLen - MAX_DISP_STR));
 
-		 printf("B. MathString: %s Length: %d \n",&mathString, mathStrLen);
+		printf("B. MathString: %s Length: %d \n\n",&mathString, mathStrLen);
 
-		 if(mathStrLen > MAX_DISP_STR){								//Expression is longer than display.
-			 BSP_LCD_DisplayStringAt(15,13,(&mathString + (mathStrLen - MAX_DISP_STR)),LEFT_MODE);		//Only display portion of expression.
-		 }
-		 else{															//Expression fits display.
-			 printf("Just before the print. String is: %s \n", mathString);
-			 BSP_LCD_DisplayStringAt(15,13,&mathString,LEFT_MODE);		//Write information to screen.
-		 }
+		if(mathStrLen > MAX_DISP_STR) 	BSP_LCD_DisplayStringAt(15,13,displayPointer,LEFT_MODE);	//Expression > Display
+		else 						 	BSP_LCD_DisplayStringAt(15,13,(&mathString),LEFT_MODE);		//Expression < Display
+
 	}
 
 }
@@ -213,43 +220,33 @@ void CalculatorProcess (void)
 	BSP_LCD_SetBackColor(0xFFFF);				//Background Color: White
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
-	/** Column 1 [7,4,1,0] **/
+	/** COL1: [7,4,1,0] **/
     if (((display.x >= 0) && (display.x <= 80)))
     {
-      /* 7 */
-      if ((display.y >= 49) && (display.y < 96))
+      if ((display.y >= 49) && (display.y < 96)) 			/* 7 */
       {
     	  updateDisplay("7");
-    	  HAL_Delay(500);												//Stops it from wigging out.
+    	  HAL_Delay(100);												//Stops it from wigging out.
 
       }
-      /* 4 */
-      else if ((display.y >= 97) && (display.y <= 144))
+      else if ((display.y >= 97) && (display.y <= 144)) 	/* 4 */
       {
-//    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '4');	//Get X pos from array.
-//		  characterSpots[charPos] = 1;									//Update available locations in textbox.
     	  updateDisplay("4");
-		  HAL_Delay(500);	//Stops it from wigging out.
+		  HAL_Delay(100);
       }
-      /* 1 */
-      else if ((display.y >= 145) && (display.y <= 192))
+      else if ((display.y >= 145) && (display.y <= 192))  	/* 1 */
       {
-//    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '1');	//Get X pos from array.
-//		  characterSpots[charPos] = 1;									//Update available locations in textbox.
     	  updateDisplay("1");
-		  HAL_Delay(500);	//Stops it from wigging out.
+		  HAL_Delay(100);
       }
       /* 0 */
       else if ((display.y >= 193) && (display.y <= 240))
       {
-    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '0');	//Get X pos from array.
-		  characterSpots[charPos] = 1;									//Update available locations in textbox.
-		  HAL_Delay(500);	//Stops it from wigging out.
+    	  updateDisplay("0");
+		  HAL_Delay(100);
       }
-
-
     }
-    /** Column 2 [8,5,2,C] **/
+    /** COL2: [8,5,2,C] **/
     else if (((display.x >= 81) && (display.x <= 160))){
           /* 8 */
 		   if ((display.y >= 49) && (display.y < 96))
