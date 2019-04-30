@@ -115,7 +115,7 @@ void CalculatorInit (void)
   BSP_LCD_SetTextColor(0xE0A2);
   BSP_LCD_FillRect (81, 193, 80, 48);	// [C]
 
-  /* Draw Grid (Borders) */
+  /* Draw Grid (Borders are 2 thick) */
   BSP_LCD_SetTextColor (LCD_COLOR_BLACK);
   BSP_LCD_DrawHLine (0,47, 320);		//0a
   BSP_LCD_DrawHLine (0,48, 320);		//0b
@@ -137,6 +137,14 @@ void CalculatorInit (void)
   BSP_LCD_DrawVLine (319, 49, 192);		//3a
   BSP_LCD_DrawVLine (320, 49, 192);		//3b
 
+  //Updated buttons vert lines.
+  BSP_LCD_DrawVLine (119, 193, 48);		//1a
+  BSP_LCD_DrawVLine (120, 193, 48);		//1b
+  BSP_LCD_DrawVLine (199, 193, 48);		//2a
+  BSP_LCD_DrawVLine (200, 193, 48);		//2b
+  BSP_LCD_DrawVLine (279, 49 , 192);	//3a
+  BSP_LCD_DrawVLine (280 ,49 , 192);	//3b
+
   /** DRAWING CHARACTERS **/
 
   BSP_LCD_SetTextColor (LCD_COLOR_BLACK);	//Text Color: Black
@@ -154,23 +162,35 @@ void CalculatorInit (void)
   BSP_LCD_DisplayChar (114, 61, '8');
   BSP_LCD_DisplayChar (114, 109, '5');
   BSP_LCD_DisplayChar (114, 157, '2');
+  /* Split Cell */
   BSP_LCD_SetBackColor(0xE0A2);				//Background Color: Red
-  BSP_LCD_DisplayChar (114, 205, 'C');
+  BSP_LCD_DisplayChar (93, 205, 'C');
+  BSP_LCD_SetFont (&Font12);				//Font Size: 12
+  BSP_LCD_DisplayStringAt (130, 210, "DEL",LEFT_MODE);	//Trial and errored into place.
+  BSP_LCD_SetFont (&Font24);				//Font Size: 24
 
   /* Col 2 */
   BSP_LCD_SetBackColor(0x00FF);				//Background Color: Blue
   BSP_LCD_DisplayChar (194, 61, '9');
   BSP_LCD_DisplayChar (194, 109, '6');
   BSP_LCD_DisplayChar (194, 157, '3');
+  /* Split Cell */
   BSP_LCD_SetBackColor(0x1685);				//Background Color: Green
-  BSP_LCD_DisplayChar (194, 205, '=');
+  BSP_LCD_DisplayChar (173, 205, '=');
+  BSP_LCD_SetFont (&Font12);				//Font Size: 12
+  BSP_LCD_DisplayStringAt (210, 210, "ANS",LEFT_MODE);	//Trial and errored into place.
+  BSP_LCD_SetFont (&Font24);				//Font Size: 24
 
-  /* Col 3 */
+  /* Col 3: All Split*/
   BSP_LCD_SetBackColor(0xFF00);				//Background Color: Yellow
-  BSP_LCD_DisplayChar (274, 61, '+');
-  BSP_LCD_DisplayChar (274, 109, '-');
-  BSP_LCD_DisplayChar (274, 157, 'x');
-  BSP_LCD_DisplayChar (274, 205, '%');
+  BSP_LCD_DisplayChar (253, 61, '+');
+  BSP_LCD_DisplayChar (290, 61, '-');
+  BSP_LCD_DisplayChar (253, 109, 'x');
+  BSP_LCD_DisplayChar (290, 109, '/');
+  BSP_LCD_DisplayChar (253, 157, '%');
+  BSP_LCD_DisplayChar (290, 160, '^');
+  BSP_LCD_DisplayChar (250, 205, '(');
+  BSP_LCD_DisplayChar (293, 205, ')');
 
 
 
@@ -188,6 +208,7 @@ void CalculatorProcess (void)
 
 	BSP_LCD_SetBackColor(0xFFFF);				//Set Background Color: White
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Set Text Color: Black.
+
 
     if (((display.x >= 0) && (display.x <= 80)))			/* COL1: [7,4,1,0] */
     {
@@ -212,8 +233,7 @@ void CalculatorProcess (void)
 		  HAL_Delay(100);
       }
     }
-
-    else if (((display.x >= 81) && (display.x <= 160))){	/* COL2: [8,5,2,C] */
+    else if (((display.x >= 81) && (display.x <= 160))){	/* COL2: [8,5,2,[C,DEL]] */
 
     	if ((display.y >= 49) && (display.y < 96))			/* 8 */
 	   {
@@ -227,16 +247,22 @@ void CalculatorProcess (void)
 	   }
 	   else if ((display.y >= 145) && (display.y <= 192))	/* 2 */
 	   {
+
 		  updateDisplay("2");
 		  HAL_Delay(100);
 	   }
-	   else if ((display.y >= 193) && (display.y <= 240))	/* C */
+	   else if ((display.y >= 193) && (display.y <= 240))
 	   {
-		 ClearTextBox();
-		 HAL_Delay(100);
+		   if(display.x <= 120){							/* C */
+			   ClearTextBox();
+			   HAL_Delay(100);
+		   }else{
+			   updateDisplay("D");							/* DEL */
+			   HAL_Delay(100);
+		   }
 	   }
     }
-    else if (((display.x >= 161) && (display.x <= 240))){	 /* COL3: [9,6,3,=] */
+    else if (((display.x >= 161) && (display.x <= 240))){	 /* COL3: [9,6,3,[=,ANS]] */
 
     	if ((display.y >= 49) && (display.y < 96))			/* 9 */
 	   {
@@ -253,42 +279,61 @@ void CalculatorProcess (void)
 		  updateDisplay("3");
 		  HAL_Delay(100);
 	   }
-	   else if ((display.y >= 193) && (display.y <= 240))	/* = */
+	   else if ((display.y >= 193) && (display.y <= 240))
 	   {
-		   //Send Math String to Parser.
+		   if(display.x <= 200){
+			   updateDisplay("=");							/* = */
+			   HAL_Delay(100);
+		   }else{
+			   updateDisplay("A");							/* ANS */
+			   HAL_Delay(100);
+		   }
 	   }
     }
-	else if (((display.x >= 241) && (display.x <= 320))){	 /* COL4: [+,-,x,%] */
+	else if (((display.x >= 241) && (display.x <= 320))){	 /* COL4: [ [+, -], [x, /], [%, ^], [(, )] ] */
 
-	   if ((display.y >= 49) && (display.y < 96))			/* + */
+	   if ((display.y >= 49) && (display.y < 96))
 	   {
-		  updateDisplay("+");
-		  HAL_Delay(100);
+		   if(display.x <= 280){
+				   updateDisplay("+");						/* + */
+				   HAL_Delay(100);
+			   }else{
+				   updateDisplay("-");						/* - */
+				   HAL_Delay(100);
+			   }
 	   }
-	   else if ((display.y >= 97) && (display.y <= 144))	/* - */
+	   else if ((display.y >= 97) && (display.y <= 144))
 	   {
-		  updateDisplay("-");
-		  HAL_Delay(100);
+		   if(display.x <= 280){
+				   updateDisplay("x");						/* x */
+				   HAL_Delay(100);
+			   }else{
+				   updateDisplay("/");						/* / */
+				   HAL_Delay(100);
+			   }
 	   }
-	   else if ((display.y >= 145) && (display.y <= 192))	/* x */
+	   else if ((display.y >= 145) && (display.y <= 192))
 	   {
-		  updateDisplay("x");
-		  HAL_Delay(100);
+		   if(display.x <= 280){
+				   updateDisplay("%");						/* % */
+				   HAL_Delay(100);
+			   }else{
+				   updateDisplay("^");						/* ^ */
+				   HAL_Delay(100);
+			   }
 	   }
-	   else if ((display.y >= 193) && (display.y <= 240))	/* % */
+	   else if ((display.y >= 193) && (display.y <= 240))
 	  {
-		  updateDisplay("%");
-		  HAL_Delay(100);
+		   if(display.x <= 280){
+				   updateDisplay("(");						/* ( */
+				   HAL_Delay(100);
+			   }else{
+				   updateDisplay(")");						/* ) */
+				   HAL_Delay(100);
+			   }
 	  }
-
-
-	}
-
-
-  }
-
-
-
+	}//End Col
+  }// End Button Checks
 }//End CalculatorProcess
 
 
