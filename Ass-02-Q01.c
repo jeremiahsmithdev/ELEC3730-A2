@@ -14,6 +14,7 @@
 
 #include "Ass-02.h"
 #include <ctype.h>
+#include <stdlib.h>
 #ifdef STM32F407xx
 #endif
 
@@ -25,7 +26,7 @@ void serial_string_parser(char**,int*);
 int string_parser(char *inp, char **array_of_words_p[]);
 
 int debug = 0;
-//
+
 //int main()
 //{
 //	CommandLineParserInit();
@@ -39,7 +40,7 @@ void CommandLineParserInit (void)
 	printf ("\n");
 	printf ("%s\n", ASS_STRING);
 	printf ("%s\n", VER_STRING);
-	printf ("Command Line Parser Example\n");
+	printf ("Command Line Parser Example EDITED\n");
 }
 
 // Check for input and echo back
@@ -99,128 +100,143 @@ void CommandLineParserProcess (void)
 //		free(arrayOfWords);
 //
 //	}
+int error = 0;
+	char c;
+	int i, j;
+	char command_line[MAX_STR_LEN + 1];
+	char **array_of_words;
+	int count;
 
-	int error = 0;
-		char c;
-		int i, j;
-		char command_line[MAX_STR_LEN + 1];
-		char **array_of_words;
-		int count;
-
-		// Get one line of input
-		printf("> ");
-		i = 0;
-		c = getchar();
-		while (c != CR && i < MAX_STR_LEN) {
-			command_line[i] = c;
+	// Get one line of input
+	printf("> ");
+	i = 0;
+	c = getchar();
+//	while (c != CR && i < MAX_STR_LEN) {
+//		command_line[i] = c;
+//		i++;
+//		c = getchar();
+//	}
+	while (c != CR && i < MAX_STR_LEN) {          // Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
+			printf("%c", c);								 // [0x0a] is ugly as shit.
+			if (c < ' ') printf("[0x%02x]", c);
+			if (c != NL) command_line[i] = c;
 			i++;
 			c = getchar();
 		}
-		command_line[i] = 0;
+	if (c == CR)
+		printf("\n");
 
-		// Parse the input and print result
-		count = string_parser(command_line, &array_of_words);
+	command_line[i] = 0;
 
-		// ~~~ operations
-		float result = 0;
+	// Parse the input and print result
+	count = string_parser(command_line, &array_of_words);
 
-		// loop over input words
-		for (int i = 0; i < count; i++)
+	// ~~~ operations
+	float result = 0;
+
+	// loop over input words
+	for (int i = 0; i < count; i++)
+	{
+
+		// result starts as first number entered
+		if (i == 1)
 		{
-
-			// result starts as first number entered
-			if (i == 1)
-				result = strtof(array_of_words[1], NULL);
-
-			/*  add <num 1> .. <num N> Sum one or more numbers. */
-			else if (strcmp(array_of_words[0], "add") == 0)
-				result += strtof(array_of_words[i], NULL);
-			/* sub <num 1> <num 2> Subtract two numbers. */
-			else if (strcmp(array_of_words[0], "sub") == 0)
-				result -= strtof(array_of_words[i], NULL);
-			/* mul <num 1> .. <num N> Multiply one or more numbers. */
-			else if (strcmp(array_of_words[0], "mul") == 0)
-				result *= strtof(array_of_words[i], NULL);
-			/* div <num 1> <num 2> Divide two numbers.*/
-			else if (strcmp(array_of_words[0], "div") == 0)
-				result /= strtof(array_of_words[i], NULL);
-
-			/* debug <on|off> Turn debug messages on or off. */
-			else if (strcmp(array_of_words[0], "debug") == 0)
-			{
-				if (count == 1)
-				{
-					if (debug == 0)
-						printf("Debug messages are off\n");
-					if (debug == 1)
-						printf("Debug messages are on\n");
-					return;
-				}
-				else if (strcmp(array_of_words[1], "on") == 0)
-				{
-					debug = 1;
-					printf("Debug messages will now be displayed\n");
-				}
-				else if (strcmp(array_of_words[1], "off") == 0)
-				{
-					debug = 0;
-					printf("Debug messages will not be displayed\n");
-				}
-				else if (debug == 1)
-					printf("Error: Debug commands include 'debug on', 'debug off' and 'debug' (to see the debug status)\n");
-				return;
-			}
-			/* help [<command>] Display help messages.*   d) */
-			else if (strcmp(array_of_words[0], "help") == 0)
-			{
-				// prints help messages for all commands
-				if (count == 1)
-				{
-
-					printf("add - Performs an addition operation on the succeeding numbers\n");
-					printf("sub - Performs a subtraction operation on the succeeding numbers\n");
-					printf("mul - Performs a multiplication operation on the succeeding numbers\n");
-					printf("div - Performs a division operation on the succeeding numbers\n");
-					printf("debug - Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
-					return;
-				}
-				else if (strcmp(array_of_words[1], "add") == 0)
-					printf("Performs an addition operation on the succeeding numbers\n");
-				else if (strcmp(array_of_words[1], "sub") == 0)
-					printf("Performs a subtraction operation on the succeeding numbers\n");
-				else if (strcmp(array_of_words[1], "mul") == 0)
-					printf("Performs a multiplication operation on the succeeding numbers\n");
-				else if (strcmp(array_of_words[1], "div") == 0)
-					printf("Performs a division operation on the succeeding numbers\n");
-				else if (strcmp(array_of_words[1], "debug") == 0)
-					printf("Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
-				else if (debug == 1)
-					printf("No help for '%s'", array_of_words[1]);
-				return;
-			}
-			// invalid command
-			else if (debug == 1)
-			{
-				printf("'%s' is an invalid command, type command 'help' to see a list of available commands\n", array_of_words[0]);
-				return;
-			}
-
-		if (debug == 1 && i >= 1)
-			for (int a = 0; a < strlen(array_of_words[i]); a++)
-			{
-				if (!isdigit(array_of_words[i][a]))
-					printf("Please enter numbers after a calculator operation to see valid results\n");
-				error = 1;
-			}
-	}
-
-		if (error == 0)
-			printf("Result : %g\n\n", result);
-
-		if (count != 0) {
-			free(array_of_words[0]);
-			free(array_of_words);
+			result = strtof(array_of_words[1], NULL);
+//			result = atof(array_of_words[1]);
+//			printf("word is '%s'\n", array_of_words[1]);
+////			scanf(array_of_words[1], &result);
+//		printf("result is %f\n", result);
 		}
+
+		/*  add <num 1> .. <num N> Sum one or more numbers. */
+		else if (strcmp(array_of_words[0], "add") == 0)
+			result += strtof(array_of_words[i], NULL);
+		/* sub <num 1> <num 2> Subtract two numbers. */
+		else if (strcmp(array_of_words[0], "sub") == 0)
+			result -= strtof(array_of_words[i], NULL);
+		/* mul <num 1> .. <num N> Multiply one or more numbers. */
+		else if (strcmp(array_of_words[0], "mul") == 0)
+			result *= strtof(array_of_words[i], NULL);
+		/* div <num 1> <num 2> Divide two numbers.*/
+		else if (strcmp(array_of_words[0], "div") == 0)
+			result /= strtof(array_of_words[i], NULL);
+
+		/* debug <on|off> Turn debug messages on or off. */
+		else if (strcmp(array_of_words[0], "debug") == 0)
+		{
+			if (count == 1)
+			{
+				if (debug == 0)
+					printf("Debug messages are off\n");
+				if (debug == 1)
+					printf("Debug messages are on\n");
+				return;
+			}
+			else if (strcmp(array_of_words[1], "on") == 0)
+			{
+				debug = 1;
+				printf("Debug messages will now be displayed\n");
+			}
+			else if (strcmp(array_of_words[1], "off") == 0)
+			{
+				debug = 0;
+				printf("Debug messages will not be displayed\n");
+			}
+			else if (debug == 1)
+				printf("Error: Debug commands include 'debug on', 'debug off' and 'debug' (to see the debug status)\n");
+			return;
+		}
+		/* help [<command>] Display help messages.*   d) */
+		else if (strcmp(array_of_words[0], "help") == 0)
+		{
+			// prints help messages for all commands
+			if (count == 1)
+			{
+
+				printf("add - Performs an addition operation on the succeeding numbers\n");
+				printf("sub - Performs a subtraction operation on the succeeding numbers\n");
+				printf("mul - Performs a multiplication operation on the succeeding numbers\n");
+				printf("div - Performs a division operation on the succeeding numbers\n");
+				printf("debug - Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
+				return;
+			}
+			else if (strcmp(array_of_words[1], "add") == 0)
+				printf("Performs an addition operation on the succeeding numbers\n");
+			else if (strcmp(array_of_words[1], "sub") == 0)
+				printf("Performs a subtraction operation on the succeeding numbers\n");
+			else if (strcmp(array_of_words[1], "mul") == 0)
+				printf("Performs a multiplication operation on the succeeding numbers\n");
+			else if (strcmp(array_of_words[1], "div") == 0)
+				printf("Performs a division operation on the succeeding numbers\n");
+			else if (strcmp(array_of_words[1], "debug") == 0)
+				printf("Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
+			else if (debug == 1)
+				printf("No help for '%s'", array_of_words[1]);
+			return;
+		}
+		// invalid command
+		else if (debug == 1)
+		{
+			printf("'%s' is an invalid command, type command 'help' to see a list of available commands\n", array_of_words[0]);
+			return;
+		}
+
+	if (debug == 1 && i >= 1)
+		for (int a = 0; a < strlen(array_of_words[i]); a++)
+		{
+			if (!isdigit(array_of_words[i][a]))
+				printf("Please enter numbers after a calculator operation to see valid results\n");
+			error = 1;
+		}
+}
+
+	if (error == 0)
+		printf("Result : %g\n\n", result);
+
+	if (count != 0) {
+		free(array_of_words[0]);
+		free(array_of_words);
+	}
 #else
 	int error = 0;
 	char c;
@@ -253,6 +269,7 @@ void CommandLineParserProcess (void)
 		// result starts as first number entered
 		if (i == 1)
 			result = strtof(array_of_words[1], NULL);
+
 
 		/*  add <num 1> .. <num N> Sum one or more numbers. */
 		else if (strcmp(array_of_words[0], "add") == 0)
@@ -379,7 +396,7 @@ void serial_string_parser(char** array_of_words, int* count) {
 }
 
 
-/* These functions are from Q4 of A1 */
+/* These functiond are from Q4 of A1 */
 
 /*
  * Gets the size of the contents of a char pointer.
