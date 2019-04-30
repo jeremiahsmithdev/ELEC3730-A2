@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX_MATH_STR 34				//This is the maximum number of characters that an expression may have in calculator.
-#define MAX_DISP_STR 17				//This is the maximum number of characters that may be displayed on the screen at any time.
+#define MAX_MATH_STR 30				//This is the maximum number of characters that an expression may have in calculator.
+#define MAX_DISP_STR 12				//This is the maximum number of characters that may be displayed on the screen at any time.
 
 
 int characterPositionsX[10] = {15,47,79,111,143,175,207,239,271,303};	//X-Places in textbox. Maybe even these out (minus all by 5 or something).
@@ -28,7 +28,7 @@ static void mathParser(void){
 static void ClearTextBox(){
 
 	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
-	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
+	BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
 	mathString = '\0'; //Sets start of string to null again.
@@ -42,18 +42,18 @@ static void displayError(){
 	uint8_t UCharError = (uint8_t)*error;
 
 	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
-	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
+	BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
 
-	BSP_LCD_DisplayStringAt(15,13,"Max Char Reached",LEFT_MODE); 		//Display Error
+	BSP_LCD_DisplayStringAt(85,13,"Max Char 30",LEFT_MODE); 		//Display Error
 	HAL_Delay(1000);
 
 	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
-	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
+	BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
-	BSP_LCD_DisplayStringAt(15,13,&mathString,LEFT_MODE);				//Display Expression
+	BSP_LCD_DisplayStringAt(81,13,&mathString,LEFT_MODE);				//Display Expression
 
 }
 
@@ -76,8 +76,8 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 
 		printf("B. MathString: %s Length: %d \n\n",&mathString, mathStrLen);
 
-		if(mathStrLen > MAX_DISP_STR) 	BSP_LCD_DisplayStringAt(15,13,displayPointer,LEFT_MODE);	//Expression > Display
-		else 						 	BSP_LCD_DisplayStringAt(15,13,(&mathString),LEFT_MODE);		//Expression < Display
+		if(mathStrLen > MAX_DISP_STR) 	BSP_LCD_DisplayStringAt(85,13,displayPointer,LEFT_MODE);	//Expression > Display
+		else 						 	BSP_LCD_DisplayStringAt(85,13,(&mathString),LEFT_MODE);		//Expression < Display
 
 	}
 
@@ -100,6 +100,10 @@ void CalculatorInit (void)
 
 
   /** DRAWING BOXES **/
+
+  /* Scroll Buttons */
+  BSP_LCD_SetTextColor(0xF81E);			//Text Colour: Power Ranger Pink
+  BSP_LCD_FillRect (0, 0, 80, 48);
 
   /* Numbers [0-9] */
   BSP_LCD_SetTextColor(0x00FF);
@@ -128,14 +132,16 @@ void CalculatorInit (void)
   BSP_LCD_DrawHLine (0,239, 320);		//4a
   BSP_LCD_DrawHLine (0,240, 320);		//4b
 
-  BSP_LCD_DrawVLine (79, 49, 192);		//0a
-  BSP_LCD_DrawVLine (80, 49, 192);		//0b
+  BSP_LCD_DrawVLine (79, 0, 240);		//0a: Updated for scroll buttons
+  BSP_LCD_DrawVLine (80, 0, 240);		//0b: Updated for scroll buttons
   BSP_LCD_DrawVLine (159, 49, 192);		//1a
   BSP_LCD_DrawVLine (160, 49, 192);		//1b
   BSP_LCD_DrawVLine (239, 49, 192);		//2a
   BSP_LCD_DrawVLine (240, 49, 192);		//2b
   BSP_LCD_DrawVLine (319, 49, 192);		//3a
   BSP_LCD_DrawVLine (320, 49, 192);		//3b
+  BSP_LCD_DrawVLine (39, 0, 48);		//Scrolla
+  BSP_LCD_DrawVLine (40, 0, 48);		//Scrollb
 
   //Updated buttons vert lines.
   BSP_LCD_DrawVLine (119, 193, 48);		//1a
@@ -192,6 +198,11 @@ void CalculatorInit (void)
   BSP_LCD_DisplayChar (250, 205, '(');
   BSP_LCD_DisplayChar (293, 205, ')');
 
+  /* Scroll Buttons */
+  BSP_LCD_SetBackColor(0xF81E);				//Background Color: Power Ranger Pink
+  BSP_LCD_DisplayChar (10, 13, '<');
+  BSP_LCD_DisplayChar (55, 13, '>');
+
 
 
 
@@ -231,6 +242,15 @@ void CalculatorProcess (void)
       {
     	  updateDisplay("0");
 		  HAL_Delay(100);
+      }
+      else if((display.y >= 0) && (display.y <= 48)){		/* Scroll Buttons */
+    	  if(display.x <= 40){
+    		  updateDisplay("<");							/* < */
+			  HAL_Delay(100);
+    	  }else{											/* > */
+    		  updateDisplay(">");
+    		  HAL_Delay(100);
+    	  }
       }
     }
     else if (((display.x >= 81) && (display.x <= 160))){	/* COL2: [8,5,2,[C,DEL]] */
