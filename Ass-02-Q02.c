@@ -3,26 +3,34 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX_MATH_STR 20				//This is the maximum number of characters that an expression may have in calculator.
-#define MAX_DISP_STR 10				//This is the maximum number of characters that may be displayed on the screen at any time.
+#define MAX_MATH_STR 34				//This is the maximum number of characters that an expression may have in calculator.
+#define MAX_DISP_STR 17				//This is the maximum number of characters that may be displayed on the screen at any time.
+
+
 int characterPositionsX[10] = {15,47,79,111,143,175,207,239,271,303};	//X-Places in textbox. Maybe even these out (minus all by 5 or something).
 static int characterSpots[10] = {0};
+static int mathStrLen = 0;
+static char mathString = '\0';									//This is the string that contains the characters that contain the entire mathematical expression.
 
-static uint8_t* mathString;			//This is the string that contains the characters that contain the entire mathematical expression.
-static uint8_t* theResult;
-static int mathStringP;				//This is the pointer for the math string.
 
-static void mathParser(void){
 
-	//This function will parse the math expression and return the result OR an error if the expression made no sense.
-	// +, -, x, / ,% , ( , ) , ., =, ^,
-}
 
-/*
- * Just writes over the entire text box with background color.
- * Also Resets the flags for the free position on the screen.
- *
- * */
+
+//static uint8_t theResult;					//The reason these must be uint8_t is because of the LCD functions parameter requirements.
+//static int mathStringP;				//This is the pointer for the math string.
+
+///*
+// * Takes in a mathematical expression as a String and parses it for the solution.
+// *
+// * */
+//static void mathParser(void){
+//
+//	//This function will parse the math expression and return the result OR an error if the expression made no sense.
+//	// +, -, x, / ,% , ( , ) , ., =, ^,
+//}
+
+
+/* Just writes over the entire text box with background color. Also Resets the flags for the free position on the screen.*/
 static void ClearTextBox(){
 
 
@@ -30,15 +38,15 @@ static void ClearTextBox(){
 	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
-	//Reset Flags.
-	for(int i = 0; i<10; i++){
-		characterSpots[i] = 0;
-	}
+	mathString = '\0'; //Sets start of string to null again.
+	mathStrLen = 0;
+//	//Reset Flags.
+//	for(int i = 0; i<10; i++){
+//		characterSpots[i] = 0;
+//	}
 }
 
-/*
- *  Manages where characters may be written to in the TextBox.
- */
+/* Manages where characters may be written to in the TextBox. */
 static int characterManager(){
 
 
@@ -50,9 +58,6 @@ static int characterManager(){
 		}
 	}
 
-	//If we got to here then the screen is full. Put some sort of user feedback in here.
-	//For now just clear textbox.
-	//ClearTextBox();
 	return 0;
 
 
@@ -61,26 +66,43 @@ static int characterManager(){
 /* Displays an error when you go over maximum number of characters in expression. */
 static void displayError(){
 
-	ClearTextBox();											//Clear Display
-	BSP_LCD_DisplayStringAtLine(0,"MAX CHAR REACHED");		//Show Error
-	ClearTextBox();											//Clear Display
-	BSP_LCD_DisplayStringAtLine(0,mathString);				//Display String Again
+	char* error = "Max Char";
+	uint8_t UCharError = (uint8_t)*error;
+
+
+	ClearTextBox();														//Clear Display
+	BSP_LCD_DisplayStringAt(15,13,"Max Char Reached",LEFT_MODE); 		//Display Error
+	HAL_Delay(1000);
+	ClearTextBox();														//Clear Display
+	BSP_LCD_DisplayStringAt(15,13,mathString,LEFT_MODE);				//Display Expression
 
 }
 
 /* Update strings and display. */
-static void updateDisplay(char theChar){
+static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTED.
 
-	if(strlen(mathString) > MAX_MATH_STR){					//calculates length based on characters up to but not including null.
+	if((mathStrLen) > MAX_MATH_STR){															//Calculates length based on characters up to but not including null.
 
-		displayError();										//displays the error.
+		displayError(mathString);
 
 	}else{
+		//concatenate character onto expression.
+		printf("A. MathString: %s Length: %d \n",&mathString, mathStrLen);
+		strcat(&mathString,theChar);
 
-		strcat(mathString,theChar);							//Update string
+		(mathStrLen)++;
 
-		BSP_LCD_DisplayStringAtLine(0, mathString);			//display string
+		 printf("B. MathString: %s Length: %d \n",&mathString, mathStrLen);
+
+		 if(mathStrLen > MAX_DISP_STR){								//Expression is longer than display.
+			 BSP_LCD_DisplayStringAt(15,13,(&mathString + (mathStrLen - MAX_DISP_STR)),LEFT_MODE);		//Only display portion of expression.
+		 }
+		 else{															//Expression fits display.
+			 printf("Just before the print. String is: %s \n", mathString);
+			 BSP_LCD_DisplayStringAt(15,13,&mathString,LEFT_MODE);		//Write information to screen.
+		 }
 	}
+
 }
 
 
@@ -181,7 +203,8 @@ void CalculatorInit (void)
 void CalculatorProcess (void)
 {
 
-  uint16_t linenum = 0;
+
+
   int charPos = characterManager();
 
   if (BSP_TP_GetDisplayPoint (&display) == 0)	//Reading in the touched points.
@@ -196,24 +219,24 @@ void CalculatorProcess (void)
       /* 7 */
       if ((display.y >= 49) && (display.y < 96))
       {
-//    	 BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '7');	//Get X pos from array.
-//    	 characterSpots[charPos] = 1;									//Update available locations in textbox.
-    	 updateDisplay();
+    	  updateDisplay("7");
     	  HAL_Delay(500);												//Stops it from wigging out.
 
       }
       /* 4 */
       else if ((display.y >= 97) && (display.y <= 144))
       {
-    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '4');	//Get X pos from array.
-		  characterSpots[charPos] = 1;									//Update available locations in textbox.
+//    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '4');	//Get X pos from array.
+//		  characterSpots[charPos] = 1;									//Update available locations in textbox.
+    	  updateDisplay("4");
 		  HAL_Delay(500);	//Stops it from wigging out.
       }
       /* 1 */
       else if ((display.y >= 145) && (display.y <= 192))
       {
-    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '1');	//Get X pos from array.
-		  characterSpots[charPos] = 1;									//Update available locations in textbox.
+//    	  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '1');	//Get X pos from array.
+//		  characterSpots[charPos] = 1;									//Update available locations in textbox.
+    	  updateDisplay("1");
 		  HAL_Delay(500);	//Stops it from wigging out.
       }
       /* 0 */
