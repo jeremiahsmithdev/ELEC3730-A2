@@ -27,12 +27,12 @@ int string_parser(char *inp, char **array_of_words_p[]);
 
 int debug = 0;
 
-int main()
-{
-	CommandLineParserInit();
-	while(1)
-		CommandLineParserProcess();
-}
+/* int main() */
+/* { */
+/* 	CommandLineParserInit(); */
+/* 	while(1) */
+/* 		CommandLineParserProcess(); */
+/* } */
 
 void CommandLineParserInit (void)
 {
