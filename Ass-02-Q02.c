@@ -14,25 +14,18 @@ static char mathString = '\0';									//This is the string that contains the ch
 
 
 
+/*
+ * Takes in a mathematical expression as a String and parses it for the solution.
+ * */
+static void mathParser(void){
 
-
-//static uint8_t theResult;					//The reason these must be uint8_t is because of the LCD functions parameter requirements.
-//static int mathStringP;				//This is the pointer for the math string.
-
-///*
-// * Takes in a mathematical expression as a String and parses it for the solution.
-// *
-// * */
-//static void mathParser(void){
-//
-//	//This function will parse the math expression and return the result OR an error if the expression made no sense.
-//	// +, -, x, / ,% , ( , ) , ., =, ^,
-//}
+	//This function will parse the math expression and return the result OR an error if the expression made no sense.
+	// +, -, x, / ,% , ( , ) , ., =, ^,
+}
 
 
 /* Just writes over the entire text box with background color. Also Resets the flags for the free position on the screen.*/
 static void ClearTextBox(){
-
 
 	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
 	BSP_LCD_FillRect (0, 0, 320, 46);			//Write over screen.
@@ -40,27 +33,6 @@ static void ClearTextBox(){
 
 	mathString = '\0'; //Sets start of string to null again.
 	mathStrLen = 0;
-//	//Reset Flags.
-//	for(int i = 0; i<10; i++){
-//		characterSpots[i] = 0;
-//	}
-}
-
-/* Manages where characters may be written to in the TextBox. */
-static int characterManager(){
-
-
-	//Loop through and mark next available position.
-	for(int i = 0; i < 10; i++){
-
-		if(characterSpots[i] == 0){
-			return i;
-		}
-	}
-
-	return 0;
-
-
 }
 
 /* Displays an error when you go over maximum number of characters in expression. */
@@ -91,11 +63,10 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 	char* displayPointer;					//Points to beginning of portion of expression.
 
 	if((mathStrLen) > MAX_MATH_STR){		//If max expression length exceeded.
-
 		displayError();					 	// Display error message in text box.
-
-	}else{
-
+	}
+	else
+	{
 		//concatenate character onto expression.
 		printf("A. MathString: %s Length: %d \n",&mathString, mathStrLen);
 		strcat(&mathString,theChar);
@@ -207,27 +178,23 @@ void CalculatorInit (void)
 
 }
 
+
+/* Handles user inputs and passes the math expression as a string to a parser which returns result of mathematical expression. */
 void CalculatorProcess (void)
 {
 
-
-
-  int charPos = characterManager();
-
   if (BSP_TP_GetDisplayPoint (&display) == 0)	//Reading in the touched points.
   {
-	/*** If statements describe a box around touch zone corresponding to buttons. ***/
-	BSP_LCD_SetBackColor(0xFFFF);				//Background Color: White
-	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
-	/** COL1: [7,4,1,0] **/
-    if (((display.x >= 0) && (display.x <= 80)))
+	BSP_LCD_SetBackColor(0xFFFF);				//Set Background Color: White
+	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Set Text Color: Black.
+
+    if (((display.x >= 0) && (display.x <= 80)))			/* COL1: [7,4,1,0] */
     {
       if ((display.y >= 49) && (display.y < 96)) 			/* 7 */
       {
     	  updateDisplay("7");
-    	  HAL_Delay(100);												//Stops it from wigging out.
-
+    	  HAL_Delay(100);
       }
       else if ((display.y >= 97) && (display.y <= 144)) 	/* 4 */
       {
@@ -239,108 +206,80 @@ void CalculatorProcess (void)
     	  updateDisplay("1");
 		  HAL_Delay(100);
       }
-      /* 0 */
-      else if ((display.y >= 193) && (display.y <= 240))
+      else if ((display.y >= 193) && (display.y <= 240))	/* 0 */
       {
     	  updateDisplay("0");
 		  HAL_Delay(100);
       }
     }
-    /** COL2: [8,5,2,C] **/
-    else if (((display.x >= 81) && (display.x <= 160))){
-          /* 8 */
-		   if ((display.y >= 49) && (display.y < 96))
-		   {
-			 BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '8');	//Get X pos from array.
-			 characterSpots[charPos] = 1;									//Update available locations in textbox.
-			 HAL_Delay(500);												//Stops it from wigging out.
-		   }
-		   /* 5 */
-		   else if ((display.y >= 97) && (display.y <= 144))
-		   {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '5');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		   }
-		   /* 2 */
-		   else if ((display.y >= 145) && (display.y <= 192))
-		   {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '2');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		   }
-		   /* C */
-		   else if ((display.y >= 193) && (display.y <= 240))
-		  {
-			 ClearTextBox();
-			 HAL_Delay(500);
-		  }
 
+    else if (((display.x >= 81) && (display.x <= 160))){	/* COL2: [8,5,2,C] */
 
+    	if ((display.y >= 49) && (display.y < 96))			/* 8 */
+	   {
+		  updateDisplay("8");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 97) && (display.y <= 144))	/* 5 */
+	   {
+		  updateDisplay("5");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 145) && (display.y <= 192))	/* 2 */
+	   {
+		  updateDisplay("2");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 193) && (display.y <= 240))	/* C */
+	   {
+		 ClearTextBox();
+		 HAL_Delay(100);
+	   }
     }
-    /** Column 2 [9,6,3,=] **/
-    else if (((display.x >= 161) && (display.x <= 240))){
-          /* 8 */
-		   if ((display.y >= 49) && (display.y < 96))
-		   {
-			 BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '9');	//Get X pos from array.
-			 characterSpots[charPos] = 1;									//Update available locations in textbox.
-			 HAL_Delay(500);												//Stops it from wigging out.
-		   }
-		   /* 5 */
-		   else if ((display.y >= 97) && (display.y <= 144))
-		   {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '6');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		   }
-		   /* 2 */
-		   else if ((display.y >= 145) && (display.y <= 192))
-		   {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '3');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		   }
-		   /* C */
-		   else if ((display.y >= 193) && (display.y <= 240))
-		  {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '=');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		  }
+    else if (((display.x >= 161) && (display.x <= 240))){	 /* COL3: [9,6,3,=] */
 
-
+    	if ((display.y >= 49) && (display.y < 96))			/* 9 */
+	   {
+	      updateDisplay("9");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 97) && (display.y <= 144))	/* 6 */
+	   {
+		  updateDisplay("6");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 145) && (display.y <= 192)) 	/* 3 */
+	   {
+		  updateDisplay("3");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 193) && (display.y <= 240))	/* = */
+	   {
+		   //Send Math String to Parser.
+	   }
     }
-    /** Column 2 [+,-,x,%] **/
-	else if (((display.x >= 241) && (display.x <= 320))){
-		  /* 8 */
-		   if ((display.y >= 49) && (display.y < 96))
-		   {
-			 BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '+');	//Get X pos from array.
-			 characterSpots[charPos] = 1;									//Update available locations in textbox.
-			 HAL_Delay(500);												//Stops it from wigging out.
-		   }
-		   /* 5 */
-		   else if ((display.y >= 97) && (display.y <= 144))
-		   {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '-');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		   }
-		   /* 2 */
-		   else if ((display.y >= 145) && (display.y <= 192))
-		   {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, 'x');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		   }
-		   /* C */
-		   else if ((display.y >= 193) && (display.y <= 240))
-		  {
-			  BSP_LCD_DisplayChar (characterPositionsX[charPos], 13, '%');	//Get X pos from array.
-			  characterSpots[charPos] = 1;									//Update available locations in textbox.
-			  HAL_Delay(500);	//Stops it from wigging out.
-		  }
+	else if (((display.x >= 241) && (display.x <= 320))){	 /* COL4: [+,-,x,%] */
+
+	   if ((display.y >= 49) && (display.y < 96))			/* + */
+	   {
+		  updateDisplay("+");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 97) && (display.y <= 144))	/* - */
+	   {
+		  updateDisplay("-");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 145) && (display.y <= 192))	/* x */
+	   {
+		  updateDisplay("x");
+		  HAL_Delay(100);
+	   }
+	   else if ((display.y >= 193) && (display.y <= 240))	/* % */
+	  {
+		  updateDisplay("%");
+		  HAL_Delay(100);
+	  }
 
 
 	}
