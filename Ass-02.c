@@ -25,7 +25,7 @@ void Ass_02_Main (void){
 	// Loop indefinitely
 	while (1){
 
-//		CommandLineParserProcess ();
+		CommandLineParserProcess ();
 
 		#ifdef STM32F407xx
 			CalculatorProcess ();
