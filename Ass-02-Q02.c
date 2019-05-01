@@ -11,21 +11,25 @@ static int   mathStrLen = 0;
 static char  mathString[32];									//This is the string that contains the characters that contain the entire mathematical expression.
 static char* globalDisplayPointer;								//Holds scroll position. When new character is input is reset to that most up to date display.
 static int cursorX[] = {89,106,123,140,157,174,191,208,225,242,259,276,293,310};
+static int cursorPos;
 /* Prints a cursor to screen. i determines the position of cursor. */
 static void printCursor(int i){
 
 	//Clear Cursor Area
 	BSP_LCD_SetTextColor (0xFFFF);										//Text Color: White.
-	BSP_LCD_FillRect (81, 0, 239, 5);									//Write over screen.
+	BSP_LCD_FillRect (81, 1, 239, 12);									//Write over screen.
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);								//Text Color: Black.
 
 	//Determine pixel positions
 	BSP_LCD_SetBackColor(0xFFFF);			//Background Color: White
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);			//Text Color: Black
 	BSP_LCD_SetFont (&Font12);						//Font Size: 24
-	BSP_LCD_DisplayChar(cursorX[i],5,'^');
+	BSP_LCD_DisplayChar(cursorX[i],1,'^');
 	BSP_LCD_SetFont (&Font24);
-	//
+
+
+
+	printf("Cursor Position: %d", cursorPos);
 }
 
 /* Deletes the last character entered. */
@@ -41,12 +45,13 @@ static void deleteKey(){
 		diff = mathStrLen - MAX_DISP_STR;
 
 		if(diff <= 0){										//If the diff < 0 then the length of string is less than display so show whole string.
+			cursorPos = mathStrLen-1;
 			printf("making display ptr = mathString \n");
 			globalDisplayPointer = mathString;				//This assignment means that the whole string will be shown from the beginning.
 			printf("String to be displayed: %s \n", globalDisplayPointer);
 
 		}else{
-
+			cursorPos = 12;
 			globalDisplayPointer = (mathString + (mathStrLen - MAX_DISP_STR));		//If the mathStrLen is greater than display move display down the expression.
 			printf("Global Ptr not updated \n");
 		}
@@ -59,6 +64,7 @@ static void deleteKey(){
 		BSP_LCD_DisplayStringAt(85,13,globalDisplayPointer,LEFT_MODE);		//Display Expression after scroll.
 
 
+		printCursor(cursorPos);
 	}
 }
 
@@ -75,7 +81,7 @@ static void scroll(int direction){
 		 * diff < MAX_DISP_STR	: If false, you must stop scrolling or you'll scroll the display entirely off the screen.
 		 * diff > 0 			: If false, the mathString is not yet greater than the maximum amount of display char, so you'd be scrolling content off the screen entirely.
 		 */
-		if(direction && ((globalDisplayPointer - mathString) <= (diff - 1)) && (diff > 0)){
+		if(direction && ((globalDisplayPointer - mathString) <= (diff - 1)) && (diff > 0)){	//Scroll Right
 
 			globalDisplayPointer += 1;
 
@@ -86,7 +92,6 @@ static void scroll(int direction){
 
 			showString[MAX_DISP_STR] = '\0';
 
-			printf("Show String: %s \n", showString);
 
 			/* Refresh Display */
 			BSP_LCD_SetTextColor (0xFFFF);										//Text Color: White.
@@ -95,9 +100,11 @@ static void scroll(int direction){
 			BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);		//Display Expression after scroll.
 
 			printf("StrLen: %d Scroll right > \n", mathStrLen);
-			printf("Diff %d \n", diff);
 
-		}else if( (!direction) && (diff>0) && (globalDisplayPointer != mathString)){						//Prevents negative scrolling back in time.
+			//cursorPos++;
+			//printCursor(cursorPos);
+
+		}else if( (!direction) && (diff>0) && (globalDisplayPointer != mathString)){		//Scroll Left					//Prevents negative scrolling back in time.
 
 			globalDisplayPointer -= 1;
 
@@ -108,7 +115,6 @@ static void scroll(int direction){
 
 			showString[MAX_DISP_STR] = '\0';
 
-			printf("Show String: %s \n", showString);
 
 
 			/* Clear Screen */
@@ -118,10 +124,35 @@ static void scroll(int direction){
 
 			BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);		//Display Expression after scroll.
 			printf("StrLen: %d Scroll left < \n", mathStrLen);
-			printf("Diff %d \n", diff);
+
+			//cursorPos--;
+			//printCursor(cursorPos);
 
 		}
+		//For overflowed display case and cursor moving to start of string. Only want to execute if other two cases don't.
 	}
+
+		//Just for cursor. CASE: Full string is shown.
+		if(mathStrLen <= MAX_DISP_STR){
+			if(direction && cursorPos >= 0 && cursorPos < (mathStrLen-1)){
+				cursorPos ++;
+				printCursor(cursorPos);
+			}else if(!direction && cursorPos <= mathStrLen && cursorPos > 0){
+				cursorPos--;
+				printCursor(cursorPos);
+			}
+
+		}
+		//Cursor. CASE: String longer than display.
+		if(mathStrLen > MAX_DISP_STR){
+			if(direction && cursorPos >= 0 && cursorPos < (MAX_DISP_STR-1)){
+				cursorPos ++;
+				printCursor(cursorPos);
+			}else if(!direction && cursorPos <= MAX_DISP_STR && cursorPos > 0){
+				cursorPos--;
+				printCursor(cursorPos);
+			}
+		}
 }
 
 /* Takes in a mathematical expression as a String and parses it for the solution. */
@@ -164,8 +195,16 @@ static void displayError(){
 
 /* Update strings and display. */
 static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTED.
-	int diff = 0;
-//	char* displayPointer;					//Points to beginning of portion of expression to be displayed on screen.
+
+	//This logic is for the cursor and only applies to when a new char is added.
+	int diff = mathStrLen - MAX_DISP_STR;
+
+	if(diff<0) cursorPos = mathStrLen;		//Whole string is shown.
+	else{
+		//Amount over is shown.
+		cursorPos = 12;
+	}
+
 	mathString[mathStrLen] = '\0';
 	if((mathStrLen) > MAX_MATH_STR){		//If max expression length exceeded.
 		displayError();					 	// Display error message in text box.
@@ -194,6 +233,7 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 		if(mathStrLen > MAX_DISP_STR) 	BSP_LCD_DisplayStringAt(85,13,globalDisplayPointer,LEFT_MODE);	//Expression > Display
 		else 						 	BSP_LCD_DisplayStringAt(85,13,(mathString),LEFT_MODE);		//Expression < Display
 
+		printCursor(cursorPos);
 	}
 
 }
@@ -328,6 +368,7 @@ void CalculatorInit (void)
 void CalculatorProcess (void)
 {
 
+
   if (BSP_TP_GetDisplayPoint (&display) == 0)	//Reading in the touched points.
   {
 
@@ -340,36 +381,32 @@ void CalculatorProcess (void)
       if ((display.y >= 49) && (display.y < 96)) 			/* 7 */
       {
     	  updateDisplay("7");
-    	  printCursor(mathStrLen -1);
     	  HAL_Delay(100);
       }
       else if ((display.y >= 97) && (display.y <= 144)) 	/* 4 */
       {
     	  updateDisplay("4");
-    	  printCursor(mathStrLen -1);
 		  HAL_Delay(100);
       }
       else if ((display.y >= 145) && (display.y <= 192))  	/* 1 */
       {
     	  updateDisplay("1");
-    	  printCursor(mathStrLen -1);
 		  HAL_Delay(100);
       }
       else if ((display.y >= 193) && (display.y <= 240))	/* 0 */
       {
     	  updateDisplay("0");
-    	  printCursor(mathStrLen -1);
 		  HAL_Delay(100);
       }
       else if((display.y >= 0) && (display.y <= 48)){		/* Scroll Buttons */
     	  if(display.x <= 40){
 //    		  updateDisplay("<");							/* < */
-    		  printf("Scroll Left\n");
+    		  //printf("Scroll Left\n");
     		  scroll(0);
 			  HAL_Delay(100);
     	  }else{											/* > */
 //    		  updateDisplay(">");
-    		  printf("Scroll Right\n");
+    		 // printf("Scroll Right\n");
     		  scroll(1);
     		  HAL_Delay(100);
     	  }
@@ -380,20 +417,17 @@ void CalculatorProcess (void)
     	if ((display.y >= 49) && (display.y < 96))			/* 8 */
 	   {
 		  updateDisplay("8");
-		  printCursor(mathStrLen-1);
 		  HAL_Delay(100);
 	   }
 	   else if ((display.y >= 97) && (display.y <= 144))	/* 5 */
 	   {
 		  updateDisplay("5");
-		  printCursor(mathStrLen -1);
 		  HAL_Delay(100);
 	   }
 	   else if ((display.y >= 145) && (display.y <= 192))	/* 2 */
 	   {
 
 		  updateDisplay("2");
-		  printCursor(mathStrLen -1);
 		  HAL_Delay(100);
 	   }
 	   else if ((display.y >= 193) && (display.y <= 240))
