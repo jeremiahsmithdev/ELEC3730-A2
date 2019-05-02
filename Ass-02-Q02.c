@@ -10,7 +10,6 @@ int isOperator(char );
 int isFunction(char );
 static char* mathParser(char* mathString);
 float evaluatePostfix(char** queue, int qlen);
-static int getSize(char *s);
 int associative(char token);
 int greaterPrecedence(char first, char second);
 
