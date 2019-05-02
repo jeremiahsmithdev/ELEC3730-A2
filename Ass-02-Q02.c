@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
+#include <math.h>
 
 #define MAX_MATH_STR 30				//This is the maximum number of characters that an expression may have in calculator.
 #define MAX_DISP_STR 13				//This is the maximum number of characters that may be displayed on the screen at any time.
@@ -39,6 +41,7 @@ static void printCursor(int i){
 
 
 	printf("Cursor Position: %d", cursorPos);
+	printf("absolute Position: %d \n", absolutePosition());
 }
 
 /* Deletes the last character entered. */
@@ -48,7 +51,7 @@ static void deleteKey(){
 
 
 	if(mathStrLen != 0){
-		mathString[mathStrLen-1] = '\0'; 					//Replaces the last character of the string with a null.
+		mathString[mathStrLen-1] = '\0'; 					//Replaces the last character of the string with a null
 		mathStrLen--;										//Update the length of the mathString.
 		printf("mathStrnLen: %d\n", mathStrLen);
 		diff = mathStrLen - MAX_DISP_STR;
@@ -108,11 +111,6 @@ static void scroll(int direction){
 			BSP_LCD_SetTextColor (LCD_COLOR_BLACK);								//Text Color: Black.
 			BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);		//Display Expression after scroll.
 
-			printf("StrLen: %d Scroll right > \n", mathStrLen);
-
-			//cursorPos++;
-			//printCursor(cursorPos);
-
 		}else if( (!direction) && (diff>0) && (globalDisplayPointer != mathString)){		//Scroll Left					//Prevents negative scrolling back in time.
 
 			globalDisplayPointer -= 1;
@@ -124,18 +122,13 @@ static void scroll(int direction){
 
 			showString[MAX_DISP_STR] = '\0';
 
-
-
 			/* Clear Screen */
 			BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
 			BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
 			BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
 			BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);		//Display Expression after scroll.
-			printf("StrLen: %d Scroll left < \n", mathStrLen);
 
-			//cursorPos--;
-			//printCursor(cursorPos);
 
 		}
 		//For overflowed display case and cursor moving to start of string. Only want to execute if other two cases don't.
@@ -191,7 +184,7 @@ static void displayError(){
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
 	BSP_LCD_DisplayStringAt(85,13,globalDisplayPointer,LEFT_MODE);				//Display Expression
-
+	printCursor(cursorPos);
 }
 
 /* Update strings and display. */
@@ -401,13 +394,9 @@ void CalculatorProcess (void)
       }
       else if((display.y >= 0) && (display.y <= 48)){		/* Scroll Buttons */
     	  if(display.x <= 40){
-//    		  updateDisplay("<");							/* < */
-    		  //printf("Scroll Left\n");
     		  scroll(0);
 			  HAL_Delay(100);
     	  }else{											/* > */
-//    		  updateDisplay(">");
-    		 // printf("Scroll Right\n");
     		  scroll(1);
     		  HAL_Delay(100);
     	  }
@@ -516,8 +505,48 @@ void CalculatorProcess (void)
   }// End Button Checks
 }//End CalculatorProcess
 
+/* return true if char right else false. */
+int charRight(){
+	int flag = 0;
+	//If cursor not in last position and str is shorter than screen.
+	if(cursorPos != 13 && globalDisplayPointer != mathString){
+		flag = 1;
+	}
+	//else there's nothing to the right.
 
+	return flag;
+}
 
+/* Return true if char left else false. */
+int charLeft(){
+	int flag = 0;
+
+	if(cursorPos!=0){
+		//There's always something to the left as long as the cursor isn't at the beginnning.
+		flag = 1;
+	}
+	//else you're at the beginning and there's nothing to the left.
+	return flag;
+}
+
+/* Get the absolute position of the cursor relative to the string. */
+int absolutePosition(){
+	int absPos = 0;
+
+	if(globalDisplayPointer == mathString){							//If full string shown then cursor is at absolute position.
+		absPos = cursorPos;
+	}else{ 															//If partial string shown.
+		absPos = (globalDisplayPointer - mathString) + cursorPos;	//String diplays from global Pointer.
+	}
+
+	return absPos;
+}
+
+/* Handles the modification of the string. */
+void modifyDelete(){
+
+	//Copy char before delete into old string.
+}
 
 
 // PARSER //
@@ -673,7 +702,7 @@ void mathParser(void)
 
 	printf("math string is : ");
 	for (int j = 0; j != '0'; j++)
-		printf("%c", mathString[j]);
+	printf("%c", mathString[j]);
 	printf("-end\n");
 
 	/* 	while there are tokens to be read: */
