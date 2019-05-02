@@ -19,6 +19,7 @@ static char* globalDisplayPointer;								//Holds scroll position. When new char
 static int cursorX[] = {89,106,123,140,157,174,191,208,225,242,259,276,293,310};
 static int cursorPos;
 static float result;
+static char ans[32];
 
 
 
@@ -40,7 +41,7 @@ static void printCursor(int i){
 
 
 
-	printf("Cursor Position: %d", cursorPos);
+	printf("Cursor Position: %d     ", cursorPos);
 	printf("absolute Position: %d \n", absolutePosition());
 }
 
@@ -93,9 +94,9 @@ static void scroll(int direction){
 		 * diff < MAX_DISP_STR	: If false, you must stop scrolling or you'll scroll the display entirely off the screen.
 		 * diff > 0 			: If false, the mathString is not yet greater than the maximum amount of display char, so you'd be scrolling content off the screen entirely.
 		 */
-		if(direction && ((globalDisplayPointer - mathString) <= (diff - 1)) && (diff > 0)){	//Scroll Right
-
-			globalDisplayPointer += 1;
+		if(direction && ((globalDisplayPointer - mathString) <= (diff - 1)) && (diff > 0) && cursorPos == 12){	//Scroll Right
+//	if(direction  && (diff > 0) && cursorPos == 12){	//Scroll Right
+			globalDisplayPointer++;
 
 			//Performs the assignment for the string to be displayed.
 			for(int j = 0; j<MAX_DISP_STR; j++){
@@ -111,9 +112,9 @@ static void scroll(int direction){
 			BSP_LCD_SetTextColor (LCD_COLOR_BLACK);								//Text Color: Black.
 			BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);		//Display Expression after scroll.
 
-		}else if( (!direction) && (diff>0) && (globalDisplayPointer != mathString)){		//Scroll Left					//Prevents negative scrolling back in time.
+		}else if( (!direction) && (diff>0) && (globalDisplayPointer != mathString) && cursorPos == 0){		//Scroll Left					//Prevents negative scrolling back in time.
 
-			globalDisplayPointer -= 1;
+			globalDisplayPointer--;
 
 			//Performs the assignment for the string to be displayed.
 			for(int j = 0; j<MAX_DISP_STR; j++){
@@ -134,24 +135,41 @@ static void scroll(int direction){
 		//For overflowed display case and cursor moving to start of string. Only want to execute if other two cases don't.
 	}
 
+
+//	if((globalDisplayPointer-mathString) <= 0 ){
 		//Just for cursor. CASE: Full string is shown.
-		if(mathStrLen <= MAX_DISP_STR){
-			if(direction && cursorPos >= 0 && cursorPos < (mathStrLen-1)){
+//		if(mathStrLen <= MAX_DISP_STR ){			//Don't ask me why 12, it's just what happened.
+			if(direction &&  cursorPos < 12 ){
 				cursorPos ++;
-			}else if(!direction && cursorPos <= mathStrLen && cursorPos > 0){
+			}else if(!direction  && cursorPos > 0){
 				cursorPos--;
 			}
+//	}else{
+//		if(direction &&  cursorPos < (mathStrLen-1)){
+//			cursorPos ++;
+//		}else if(!direction  && cursorPos > 0){
+//			cursorPos--;
+//		}
+//	}
 
-		}
+//		}
+
+
+		//if portion being shown don't move cursor.
+		//we don't want to move cursor to left if string is being display from the beginning.
+		//we don't want to move cursor to the right if portion is being displayed.
+
 		//Cursor. CASE: String longer than display.
-		if(mathStrLen > MAX_DISP_STR){
-			if(direction && cursorPos >= 0 && cursorPos < (MAX_DISP_STR-1)){
-				cursorPos ++;
-			}else if(!direction && cursorPos <= MAX_DISP_STR && cursorPos > 0){
-				cursorPos--;
-			}
-		}
+		//else if()
+//		else{
+//			if(direction  && cursorPos < (MAX_DISP_STR-1)){
+//				cursorPos ++;
+//			}else if(!direction && cursorPos > 0){
+//				cursorPos--;
+//			}
+//		}
 
+		printf("display ptr: %d    ",(globalDisplayPointer -mathString));
 		printCursor(cursorPos);
 }
 
@@ -533,7 +551,7 @@ int absolutePosition(){
 
 	if(globalDisplayPointer == mathString){							//If full string shown then cursor is at absolute position.
 		absPos = cursorPos;
-	}else{ 															//If partial string shown.
+	}else { 															//If partial string shown.
 		absPos = (globalDisplayPointer - mathString) + cursorPos;	//String diplays from global Pointer.
 	}
 
@@ -544,6 +562,9 @@ int absolutePosition(){
 void modifyDelete(){
 
 	//Copy char before delete into old string.
+	char holder[MAX_MATH_STR];
+
+
 }
 
 
