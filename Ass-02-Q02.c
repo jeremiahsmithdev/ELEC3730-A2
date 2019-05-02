@@ -470,7 +470,7 @@ void CalculatorProcess (void)
 			   equalsPressed();
 			   HAL_Delay(100);
 		   }else{
-			   updateDisplay("A");							/* ANS */
+			   ansPressed();
 			   HAL_Delay(100);
 		   }
 	   }
@@ -851,9 +851,10 @@ void mathParser(void)
 	//Getting the solution.
 	result = evaluatePostfix(queue, qlen);	// evaluate postfix value read from stack.
 	sprintf(&mathString, "%.2f", result);		//Store the reult in the string. Null terminate that badboi
-
+	sprintf(&ans, "%.2f", result);				//Store the reult in the string. Null terminate that badboi
 	printf("Result: %g\n", result);
 	printf("amount is %s\n", mathString);
+	printf("ans is: %s\n",ans);
 }
 
 
@@ -888,7 +889,20 @@ void equalsPressed(){
 	BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);	//Display result on screen.
 }
 
+/* Insert ANS into equation. */
+void ansPressed(){
+	int i = 0;
+	char* num = ans[0];
+	*(num+1) = '\0';
 
+	while(num != '\0'){
+		updateDisplay(&num);
+		i++;
+		*(num) = ans[i];
+		*(num+1) = '\0';
+	}
+
+}
 
 
 
