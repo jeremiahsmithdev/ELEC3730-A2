@@ -1,6 +1,7 @@
 #include "Ass-02.h"
 #include <stdio.h>
 #include <stdlib.h>
+<<<<<<< Updated upstream
 #include <stdint.h>
 #include <ctype.h>
 #include <math.h>
@@ -13,10 +14,20 @@ float evaluatePostfix(char** queue, int qlen);
 static int getSize(char *s);
 int associative(char token);
 int greaterPrecedence(char first, char second);
+||||||| ancestor
+#include <time.h>
+=======
+#include <time.h>
+#include <math.h>
+#include <ctype.h>
+>>>>>>> Stashed changes
 
 #define MAX_MATH_STR 30				//This is the maximum number of characters that an expression may have in calculator.
 #define MAX_DISP_STR 13				//This is the maximum number of characters that may be displayed on the screen at any time.
 
+#define qpush(x) queue[qlen++] = x
+#define spush(x) stack[slen++] = x
+#define spop() stack[--slen]
 
 // ================ MATH PARSING SECTION =======================
 #define qpush(x) queue[qlen++] = x
@@ -322,6 +333,8 @@ static char  mathString[32];									//This is the string that contains the char
 static char* globalDisplayPointer;								//Holds scroll position. When new character is input is reset to that most up to date display.
 static int cursorX[] = {89,106,123,140,157,174,191,208,225,242,259,276,293,310};
 static int cursorPos;
+static float result = 0;
+
 /* Prints a cursor to screen. i determines the position of cursor. */
 static void printCursor(int i){
 
@@ -464,14 +477,6 @@ static void scroll(int direction){
 		}
 }
 
-/* Takes in a mathematical expression as a String and parses it for the solution. */
-static void mathParser(void){
-
-	//This function will parse the math expression and return the result OR an error if the expression made no sense.
-	// +, -, x, / ,% , ( , ) , ., =, ^,
-}
-
-
 /* Just writes over the entire text box with background color. Also Resets the flags for the free position on the screen.*/
 static void ClearTextBox(){
 
@@ -546,7 +551,6 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 	}
 
 }
-
 
 void CalculatorInit (void)
 {
@@ -672,7 +676,6 @@ void CalculatorInit (void)
 
 }
 
-
 /* Handles user inputs and passes the math expression as a string to a parser which returns result of mathematical expression. */
 void CalculatorProcess (void)
 {
@@ -770,7 +773,7 @@ void CalculatorProcess (void)
 	   else if ((display.y >= 193) && (display.y <= 240))
 	   {
 		   if(display.x <= 200){
-			   updateDisplay("=");							/* = */
+			   equalsPressed();
 			   HAL_Delay(100);
 		   }else{
 			   updateDisplay("A");							/* ANS */
@@ -826,6 +829,317 @@ void CalculatorProcess (void)
 }//End CalculatorProcess
 
 
+// PARSER //
+
+int isOperator(char token)
+{
+	if (token == 'x')
+		return 1;
+	if (token == '/')
+		return 1;
+	if (token == '+')
+		return 1;
+	if (token == '-')
+		return 1;
+	if (token == '*')
+		return 1;
+	if (token == '^')
+		return 1;
+	return 0;
+}
+
+float evaluatePostfix(char** queue, int qlen)
+{
+
+#define opush(x) opStack[olen++] = x
+#define opop() opStack[--olen]
+	int olen = 0;
+	float result = 0;
+	float opStack[100];
+/* 	for each token in the postfix expression: */
+	for (int i = 0; i < qlen; i++)
+	{
+		for (int j = 0; j < olen; j++)
+			printf("%g ", opStack[j]);
+
+		char* token = queue[i];
+		printf("[%s] ", token);
+		for (int a = i+1; a < qlen; a++)
+			printf("%s ", queue[a]);
+		printf("\n");
+
+		/*   if token is an operator: */
+		if (isOperator(token[0]))
+		{
+			/*     operand_2 ← pop from the stack */
+			float operand2 = opop();
+			/*     operand_1 ← pop from the stack */
+			float operand1 = opop();
+			/* #<{(|     push token onto the stack |)}># */
+			/*     result ← evaluate token with operand_1 and operand_2 */
+			if (token[0] == '+')
+				result = operand1 + operand2;
+			if (token[0] == '-')
+				result = operand1 - operand2;
+			if (token[0] == 'x')
+				result = operand1 * operand2;
+			if (token[0] == '/')
+				result = operand1 / operand2;
+			if (token[0] == '^')
+				result = pow(operand1, operand2);
+			/*     push result back onto the stack */
+			opush(result);
+		}
+		/*   else if token is an operand: */
+		else if (isdigit(token[0]))
+		{
+			// push token onto the stack
+			opush(atof(token));
+		}
+	}
+	/* result ← pop from the stack */
+	result = opop();
+	return result;
+}
+
+// returns 0 if left and 1 if right associative respectively
+int associative(char token)
+{
+	if (token == '^')
+		return 1;
+
+	if (token == 'x')
+		return 0;
+
+	if (token == '/')
+		return 0;
+
+	if (token == '+')
+		return 0;
+
+	if (token == '-')
+		return 0;
+	return -1;
+}
+
+// returns -1 if first has greater prec, 0 if equal and
+// 1 if second has greater
+int greaterPrecedence(char first, char second)
+{
+	int fir = 0;
+	int sec = 0;
+	if (first == '^')
+		fir = 4;
+	else if (first == 'x')
+		fir = 3;
+	else if (first == '/')
+		fir = 3;
+	else if (first == '+')
+		fir = 2;
+	else if (first == '-')
+		fir = 2;
+
+	if (second == '^')
+		sec = 4;
+	else if (second == 'x')
+		sec = 3;
+	else if (second == '/')
+		sec = 3;
+	else if (second == '+')
+		sec = 2;
+	else if (second == '-')
+		sec = 2;
+
+	if (fir > sec)
+	{
+		printf("%c has higher precedence than %c\n", first, second);
+		return -1;
+	}
+	if (fir == sec)
+	{
+
+		printf("%c has equal precedence to %c\n", first, second);
+		return 0;
+	}
+
+		printf("%c has higher precedence than %c\n", second, first);
+	return 1;
+}
+
+int isFunction(char token)
+{
+	// no functions implemented yet
+	return 0;
+}
+
+//This function will parse the math expression and return the result OR an error if the expression made no sense.
+void mathParser(void)
+{
+	char* stack[100];//malloc
+	char* queue[100];//malloc
+	int qlen = 0;
+	int slen = 0;
+
+	printf("math string is : ");
+	for (int j = 0; j != '0'; j++)
+		printf("%c", mathString[j]);
+	printf("-end\n");
+
+	/* 	while there are tokens to be read: */
+	for (int j = 0; j < strlen(mathString); j++)
+	{
+/*     read a token. */
+		char* token = (char*)malloc(sizeof(char)*10);
+		token[0] = mathString[j];
+		token[1] = '\0';
+		printf("%dReads token '%s'", j, token);
+		printf("	Action: ");
+/*     if the token is a number, then: */
+		if (isdigit(token[0]))
+		{
+			int len = 0;
+			token[len++] = token[0];
+			// read til end of number
+			while (isdigit(mathString[j+1]) || mathString[j+1] == '.')
+			{
+			#define qpush(x) queue[qlen++] = x
+				j++;
+				token[len++] = mathString[j];
+			}
+			token[len] = '\0';
+			printf("num is %s\n", token);
+			printf("Push it to the output queue\n");
+			/*         push it to the output queue. */
+			qpush(token);
+
+		}
+		/*     if the token is a function then: */
+		if (isFunction(token[0]))
+		{
+			printf("Push it to the operator stack\n");
+			/*         push it onto the operator stack  */
+			spush(token);
+		}
+		/*     if the token is an operator, then: */
+		if (isOperator(token[0]))
+		{
+			/*         while ((there is a function at the top of the operator stack) */
+			while ((slen > 0 && isFunction(stack[slen-1][0]))
+
+					/*                or (there is an operator at the top of the operator stack with greater precedence) */
+					|| (slen > 0 && isOperator(stack[slen-1][0]) && greaterPrecedence(stack[slen-1][0], token[0]) == -1)
+
+					/*                or (the operator at the top of the operator stack has equal precedence and is left associative)) */
+					|| ((slen > 0 && isOperator(stack[slen-1][0]) && greaterPrecedence(stack[slen-1][0], token[0]) == 0 && associative(stack[slen-1][0]) == 0)
+
+						/*               and (the operator at the top of the operator stack is not a left parenthesis): */
+						&& stack[slen-1][0] != '('))
+			{
+				printf("ENTER?\n");
+				/*             pop operators from the operator stack onto the output queue. */
+				printf("Pop stack to output\n");
+				qpush(spop());
+			}
+			/*         push it onto the operator stack. */
+			printf("Push it to the operator stack\n");
+			spush(token);
+		}
+		/*     if the token is a left paren (i.e. "("), then: */
+		if (token[0] == '(')
+			/*         push it onto the operator stack. */
+		{
+			printf("Push it to the operator stack\n");
+			spush(token);
+		}
+		/*     if the token is a right paren (i.e. ")"), then: */
+		if (token[0] == ')')
+		{
+			/*         while the operator at the top of the operator stack is not a left paren: */
+			while (slen > 0 && stack[slen-1][0] != '(')
+			{
+				printf("Pop stack to output\n");
+
+				/*             pop the operator from the operator stack onto the output queue. */
+				qpush(spop());
+				/*         #<{(| if the stack runs out without finding a left paren, then there are mismatched parentheses. |)}># */
+			}
+
+			/*         if there is a left paren at the top of the operator stack, then: */
+			if (stack[slen-1][0] == '(')
+			{
+				printf("Pop stack\n");
+				/*             pop the operator from the operator stack and discard it */
+				spop();
+			}
+		}
+	printf("Output queue: ");
+	for (int a = 0; a < qlen; a++)
+		printf("%s ", queue[a]);
+	printf("	Operator stack: ");
+	for (int a = 0; a < slen; a++)
+
+		printf("%s ", stack[a]);
+	printf("\n\n");
+	}
+	// end
+
+
+
+	// after loop, if operator stack not null, pop everything to output queue
+	// if there are no more tokens to read:
+	//     while there are still operator tokens on the stack:
+	while (slen > 0)
+	{
+		/*         #<{(| if the operator token on the top of the stack is a paren, then there are mismatched parentheses. |)}># */
+		if (stack[slen-1][0] == '(' || stack[slen-1][0] == ')')
+			printf("mismatched parenthesis\n");
+		/*         pop the operator from the operator stack onto the output queue. */
+		qpush(spop();)
+
+	}
+	/* exit. */
+
+	// print final contents of stack and queue
+	printf("Output queue: ");
+	for (int a = 0; a < qlen; a++)
+			printf("%s ", queue[a]);
+	printf("	Operator stack: ");
+	for (int a = 0; a < slen; a++)
+			printf("%s ", stack[a]);
+	printf("\n");
+
+
+	//Getting the solution.
+	result = evaluatePostfix(queue, qlen);	// evaluate postfix value read from stack.
+	sprintf(&mathString, "%.2f", result);		//Store the reult in the string. Null terminate that badboi
+
+	printf("Result: %g\n", result);
+	printf("amount is %s\n", mathString);
+}
+
+
+
+void equalsPressed(){
+	int diff = 0; 								//For calculating cursor position.
+	mathParser();								//This has replaced the mathString with the float.
+	mathStrLen = strlen(mathString);			//Update length of the string.
+
+	diff = mathStrLen - MAX_DISP_STR;			//Get difference.
+
+	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
+	BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
+	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
+
+	if(diff <= 0){								//String length is less than screen.
+		cursorPos = mathStrLen;
+	}else{										//String is too long for screen so...
+		cursorPos = 13;
+	}
+
+	printCursor(cursorPos);
+	BSP_LCD_DisplayStringAt(85,13,mathString,LEFT_MODE);	//Display result on screen.
+	HAL_Delay(1000);
+}
 
 
 
