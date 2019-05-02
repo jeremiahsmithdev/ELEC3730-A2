@@ -138,10 +138,8 @@ static void scroll(int direction){
 		if(mathStrLen <= MAX_DISP_STR){
 			if(direction && cursorPos >= 0 && cursorPos < (mathStrLen-1)){
 				cursorPos ++;
-				printCursor(cursorPos);
 			}else if(!direction && cursorPos <= mathStrLen && cursorPos > 0){
 				cursorPos--;
-				printCursor(cursorPos);
 			}
 
 		}
@@ -149,12 +147,12 @@ static void scroll(int direction){
 		if(mathStrLen > MAX_DISP_STR){
 			if(direction && cursorPos >= 0 && cursorPos < (MAX_DISP_STR-1)){
 				cursorPos ++;
-				printCursor(cursorPos);
 			}else if(!direction && cursorPos <= MAX_DISP_STR && cursorPos > 0){
 				cursorPos--;
-				printCursor(cursorPos);
 			}
 		}
+
+		printCursor(cursorPos);
 }
 
 /* Just writes over the entire text box with background color. Also Resets the flags for the free position on the screen.*/
@@ -342,7 +340,7 @@ void CalculatorInit (void)
   BSP_LCD_DisplayChar (290, 61, '-');
   BSP_LCD_DisplayChar (253, 109, 'x');
   BSP_LCD_DisplayChar (290, 109, '/');
-  BSP_LCD_DisplayChar (253, 157, '%');
+  BSP_LCD_DisplayChar (253, 157, '.');
   BSP_LCD_DisplayChar (290, 160, '^');
   BSP_LCD_DisplayChar (250, 205, '(');
   BSP_LCD_DisplayChar (293, 205, ')');
@@ -484,7 +482,7 @@ void CalculatorProcess (void)
 	   else if ((display.y >= 145) && (display.y <= 192))
 	   {
 		   if(display.x <= 280){
-				   updateDisplay("%");						/* % */
+				   updateDisplay(".");						/* % */
 				   HAL_Delay(100);
 			   }else{
 				   updateDisplay("^");						/* ^ */
@@ -851,13 +849,22 @@ void equalsPressed(){
 	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
 
 	if(diff <= 0){								//String length is less than screen.
-		cursorPos = mathStrLen;
+		cursorPos = (mathStrLen-1);				//-1 because strLen is not zero based.
 	}else{										//String is too long for screen so...
-		cursorPos = 13;
+		cursorPos = 12;
 	}
 
 	printCursor(cursorPos);
-	BSP_LCD_DisplayStringAt(85,13,mathString,LEFT_MODE);	//Display result on screen.
+
+	char showString[MAX_DISP_STR + 1];
+	//Performs the assignment for the string to be displayed.
+	for(int j = 0; j<MAX_DISP_STR; j++){
+		showString[j] = *(mathString+j);
+	}
+
+	showString[MAX_DISP_STR] = '\0';
+
+	BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);	//Display result on screen.
 }
 
 
