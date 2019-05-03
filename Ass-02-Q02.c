@@ -186,8 +186,6 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 	else
 	{
 		//concatenate character onto expression.
-		printf("The Char: %s\n", theChar);
-		printf("A. MathString: %s Length: %d \n",mathString, mathStrLen);
 		strcat(mathString,theChar);
 
 		mathStrLen++;
@@ -198,11 +196,6 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 		}else{
 			globalDisplayPointer = mathString;									    //Else if the expression doesn't yet exceed the display just display the entire mathString.
 		}
-
-
-//		globalDisplayPointer = displayPointer;
-
-		printf("B. MathString: %s Length: %d \n\n",mathString, mathStrLen);
 
 		if(mathStrLen > MAX_DISP_STR) 	BSP_LCD_DisplayStringAt(85,13,globalDisplayPointer,LEFT_MODE);	//Expression > Display
 		else 						 	BSP_LCD_DisplayStringAt(85,13,(mathString),LEFT_MODE);		//Expression < Display
@@ -511,6 +504,7 @@ int charLeft(){
 /* Deletes the last character entered. */
 void deleteKey(){
 
+
 	int diff = 0;
 
 
@@ -618,33 +612,43 @@ void ansPressed(){
 }
 
 /* Called if deletion or insert made. int i selects if del or ins made. */
-void modifyMathString(int mode){
+void modifyMathString(int mode, char theChar){
 
 	char tempString[32];
-	strcpy(tempString, mathString);	//Holds a copy of the old string.
+	strcpy(tempString, mathString);					//Holds a copy of the old string.
 	int targetPos;
 
-	if(mode){			//If delete performed. Remove the character to the right of the cursor (aka absolutePosition + 1).
+	if(mode){										//If delete performed. Remove the character to the right of the cursor (aka absolutePosition + 1).
 
-		for(int i = 0; i <= absolutePosition(); i++){		//Get characters before deleted char pos.
-			mathString[i] = tempString[i];					//Copy old characters into string.
-			targetPos = i;
+
+			for(int i = 0; i <= absolutePosition(); i++){		//Get characters before deleted char pos.
+				mathString[i] = tempString[i];					//Copy old characters into string.
+				targetPos = i;
+			}
+
+
+			//get characters after deleted char. i is already initialized and sitting at where the position of deleted char.
+			for(int i = targetPos+1; i<= mathStrLen; i++){
+				mathString[i-1] = tempString[i];
+			}
+
+			mathStrLen --;								//Reduce length of string.
+
+
+	}else{																//Insert
+		for(int i = 0; i < absolutePosition(); i++){				//Get characters before inserted char pos.
+						mathString[i] = tempString[i];					//Copy old characters into string.
+						targetPos = i;
+					}
+		//insert new char.
+		mathString[targetPos] = theChar;
+
+		//get characters after inserted char. Target pos is sitting at position after inserted char.
+		for(int i = targetPos + 1; i<= mathStrLen; i++){
+			mathString[i] = tempString[i-1];
 		}
 
-		printf("The target position: %d \n", targetPos);
-
-		//get characters after deleted char. i is already initialized and sitting at where the position of deleted char.
-		for(int i = targetPos+1; i<= mathStrLen; i++){
-			mathString[i-1] = tempString[i];
-		}
-
-		printf("After deletion: %s \n", mathString);
-		mathStrLen --;								//Reduce length of string.
-
-		//Cursor position is persistent in a delete.
-
-	}else{										//insert
-
+		mathStrLen ++;								//Increase length of string.
 	}
 
 }
