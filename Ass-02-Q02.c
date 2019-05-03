@@ -248,7 +248,6 @@ static void updateDisplay(const char* theChar){ //PROBLEM IS MATHSTRING IS MUNTE
 
 }
 
-
 void CalculatorInit (void)
 {
 
@@ -372,7 +371,6 @@ void CalculatorInit (void)
 
 
 }
-
 
 /* Handles user inputs and passes the math expression as a string to a parser which returns result of mathematical expression. */
 void CalculatorProcess (void)
@@ -857,8 +855,6 @@ void mathParser(void)
 	printf("ans is: %s\n",ans);
 }
 
-
-
 void equalsPressed(){
 	int diff = 0; 								//For calculating cursor position.
 	mathParser();								//This has replaced the mathString with the float.
@@ -892,14 +888,20 @@ void equalsPressed(){
 /* Insert ANS into equation. */
 void ansPressed(){
 	int i = 0;
-	char* num = ans[0];
-	*(num+1) = '\0';
+	char num = ans[0];
+	char* ansStr = &num;
+	*(ansStr +1) = '\0';
 
 	while(num != '\0'){
-		updateDisplay(&num);
+
+		updateDisplay(ansStr);
+
 		i++;
-		*(num) = ans[i];
-		*(num+1) = '\0';
+
+		num = ans[i];
+		ansStr = &num;
+		*(ansStr +1) = '\0';
+
 	}
 
 }
