@@ -45,42 +45,6 @@ static void printCursor(int i){
 	printf("absolute Position: %d \n", absolutePosition());
 }
 
-/* Deletes the last character entered. */
-static void deleteKey(){
-
-	int diff = 0;
-
-
-	if(mathStrLen != 0){
-		mathString[mathStrLen-1] = '\0'; 					//Replaces the last character of the string with a null
-		mathStrLen--;										//Update the length of the mathString.
-		printf("mathStrnLen: %d\n", mathStrLen);
-		diff = mathStrLen - MAX_DISP_STR;
-
-		if(diff <= 0){										//If the diff < 0 then the length of string is less than display so show whole string.
-			cursorPos = mathStrLen-1;
-			printf("making display ptr = mathString \n");
-			globalDisplayPointer = mathString;				//This assignment means that the whole string will be shown from the beginning.
-			printf("String to be displayed: %s \n", globalDisplayPointer);
-
-		}else{
-			cursorPos = 12;
-			globalDisplayPointer = (mathString + (mathStrLen - MAX_DISP_STR));		//If the mathStrLen is greater than display move display down the expression.
-			printf("Global Ptr not updated \n");
-		}
-
-
-		/* Refresh Display */
-		BSP_LCD_SetTextColor (0xFFFF);										//Text Color: White.
-		BSP_LCD_FillRect (81, 0, 239, 46);									//Write over screen.
-		BSP_LCD_SetTextColor (LCD_COLOR_BLACK);								//Text Color: Black.
-		BSP_LCD_DisplayStringAt(85,13,globalDisplayPointer,LEFT_MODE);		//Display Expression after scroll.
-
-
-		printCursor(cursorPos);
-	}
-}
-
 /* Moves the displayed string around.*/
 static void scroll(int direction){
 
@@ -139,7 +103,7 @@ static void scroll(int direction){
 //	if((globalDisplayPointer-mathString) <= 0 ){
 		//Just for cursor. CASE: Full string is shown.
 //		if(mathStrLen <= MAX_DISP_STR ){			//Don't ask me why 12, it's just what happened.
-			if(direction &&  cursorPos < 12 ){
+			if(direction &&  cursorPos < 12 && cursorPos < mathStrLen-1){
 				cursorPos ++;
 			}else if(!direction  && cursorPos > 0){
 				cursorPos--;
@@ -543,6 +507,47 @@ int charLeft(){
 	return flag;
 }
 
+/* Deletes the last character entered. */
+void deleteKey(){
+
+	int diff = 0;
+
+
+	if(mathStrLen != 0){
+
+		//mathString[mathStrLen-1] = '\0'; 					//Replaces the last character of the string with a null
+		//mathStrLen--;										//Update the length of the mathString.
+
+		printf("Before deletion: %s\n", mathString);
+
+		modifyMathString(1);
+
+		diff = mathStrLen - MAX_DISP_STR;
+//
+		if(diff <= 0){										//If the diff < 0 then the length of string is less than display so show whole string.
+//			cursorPos = mathStrLen-1;
+////			printf("making display ptr = mathString \n");
+			globalDisplayPointer = mathString;				//This assignment means that the whole string will be shown from the beginning.
+////			printf("String to be displayed: %s \n", globalDisplayPointer);
+//
+		}else{
+//			cursorPos = 12;
+			globalDisplayPointer = (mathString + (mathStrLen - MAX_DISP_STR));		//If the mathStrLen is greater than display move display down the expression.
+////			printf("Global Ptr not updated \n");
+		}
+
+
+		/* Refresh Display */
+		BSP_LCD_SetTextColor (0xFFFF);										//Text Color: White.
+		BSP_LCD_FillRect (81, 0, 239, 46);									//Write over screen.
+		BSP_LCD_SetTextColor (LCD_COLOR_BLACK);								//Text Color: Black.
+		BSP_LCD_DisplayStringAt(85,13,globalDisplayPointer,LEFT_MODE);		//Display Expression after scroll.
+
+
+		printCursor(cursorPos);
+	}
+}
+
 /* Get the absolute position of the cursor relative to the string. */
 int absolutePosition(){
 	int absPos = 0;
@@ -556,12 +561,86 @@ int absolutePosition(){
 	return absPos;
 }
 
-/* Handles the modification of the string. */
-void modifyDelete(){
+/* Calculate the solution and display it. Store in ANS. */
+void equalsPressed(){
+	int diff = 0; 								//For calculating cursor position.
+	mathParser();								//This has replaced the mathString with the float.
+	mathStrLen = strlen(mathString);			//Update length of the string.
 
-	//Copy char before delete into old string.
-	char holder[MAX_MATH_STR];
+	diff = mathStrLen - MAX_DISP_STR;			//Get difference.
 
+	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
+	BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
+	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
+
+	if(diff <= 0){								//String length is less than screen.
+		cursorPos = (mathStrLen-1);				//-1 because strLen is not zero based.
+	}else{										//String is too long for screen so...
+		cursorPos = 12;
+	}
+
+	printCursor(cursorPos);
+
+	char showString[MAX_DISP_STR + 1];
+	//Performs the assignment for the string to be displayed.
+	for(int j = 0; j<MAX_DISP_STR; j++){
+		showString[j] = *(mathString+j);
+	}
+
+	showString[MAX_DISP_STR] = '\0';
+
+	BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);	//Display result on screen.
+}
+
+/* Insert ANS into equation. */
+void ansPressed(){
+	int i = 0;
+	char num = ans[0];
+	char* ansStr = &num;
+	*(ansStr +1) = '\0';
+
+	while(num != '\0'){
+
+		updateDisplay(ansStr);
+
+		i++;
+
+		num = ans[i];
+		ansStr = &num;
+		*(ansStr +1) = '\0';
+
+	}
+
+}
+
+/* Called if deletion or insert made. int i selects if del or ins made. */
+void modifyMathString(int mode){
+
+	char tempString[32];
+	strcpy(tempString, mathString);	//Holds a copy of the old string.
+	int targetPos;
+
+	if(mode){			//If delete performed. Remove the character to the right of the cursor (aka absolutePosition + 1).
+
+		for(int i = 0; i <= absolutePosition(); i++){		//Get characters before deleted char pos.
+			mathString[i] = tempString[i];					//Copy old characters into string.
+			targetPos = i;
+		}
+		printf("The target position: %d \n", targetPos);
+
+		//get characters after deleted char. i is already initialized and sitting at where the position of deleted char.
+		for(int i = targetPos+1; i< mathStrLen; i++){
+			mathString[i-1] = tempString[i];
+		}
+
+		printf("After deletion: %s \n", mathString);
+		mathStrLen --;								//Reduce length of string.
+
+		//Cursor position is persistent in a delete.
+
+	}else{										//insert
+
+	}
 
 }
 
@@ -854,59 +933,6 @@ void mathParser(void)
 	printf("amount is %s\n", mathString);
 	printf("ans is: %s\n",ans);
 }
-
-void equalsPressed(){
-	int diff = 0; 								//For calculating cursor position.
-	mathParser();								//This has replaced the mathString with the float.
-	mathStrLen = strlen(mathString);			//Update length of the string.
-
-	diff = mathStrLen - MAX_DISP_STR;			//Get difference.
-
-	BSP_LCD_SetTextColor (0xFFFF);				//Text Color: White.
-	BSP_LCD_FillRect (81, 0, 239, 46);			//Write over screen.
-	BSP_LCD_SetTextColor (LCD_COLOR_BLACK);		//Text Color: Black.
-
-	if(diff <= 0){								//String length is less than screen.
-		cursorPos = (mathStrLen-1);				//-1 because strLen is not zero based.
-	}else{										//String is too long for screen so...
-		cursorPos = 12;
-	}
-
-	printCursor(cursorPos);
-
-	char showString[MAX_DISP_STR + 1];
-	//Performs the assignment for the string to be displayed.
-	for(int j = 0; j<MAX_DISP_STR; j++){
-		showString[j] = *(mathString+j);
-	}
-
-	showString[MAX_DISP_STR] = '\0';
-
-	BSP_LCD_DisplayStringAt(85,13,showString,LEFT_MODE);	//Display result on screen.
-}
-
-/* Insert ANS into equation. */
-void ansPressed(){
-	int i = 0;
-	char num = ans[0];
-	char* ansStr = &num;
-	*(ansStr +1) = '\0';
-
-	while(num != '\0'){
-
-		updateDisplay(ansStr);
-
-		i++;
-
-		num = ans[i];
-		ansStr = &num;
-		*(ansStr +1) = '\0';
-
-	}
-
-}
-
-
 
 
 
