@@ -1,6 +1,6 @@
 //
 /**
- * File: Ass-02-Q01.c
+ * File: Ass-02.h
  * 
  * @author Thomas Courtney - c3175353
  * @author Jeremiah Smith - c3238179
