@@ -1,11 +1,13 @@
-/*        $Id: Ass-02.h 1592 2019-02-05 14:38:48Z Peter $
- *  $Revision: 1592 $
- *      $Date: 2019-02-06 01:38:48 +1100 (Wed, 06 Feb 2019) $
- *    $Author: Peter $
+//
+/**
+ * File: Ass-02-Q01.c
+ * 
+ * @author Thomas Courtney - c3175353
+ * @author Jeremiah Smith - c3238179
+ * @since 03-05-2019
  */
 
 // Assignment 2 include file
-
 #ifndef ASS_02_H_
 #define ASS_02_H_
 
@@ -15,6 +17,8 @@
 #include "openx07v_c_lcd.h"
 #include "touch_panel.h"
 #include "main.h"
+
+
 #else
 
 #if WINNT
@@ -39,6 +43,7 @@
 // Assignment and version strings
 #define ASS_STRING "ELEC3730-2019 Semester 1 Assignment 2"
 #define VER_STRING "Ver: 01 $Rev: 1592 $"
+
 
 
 // Assignment main

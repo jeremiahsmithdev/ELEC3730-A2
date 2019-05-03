@@ -1,38 +1,24 @@
-/*
- * TO DO
- * - Currently issues passing by reference to functions.
- * - Need to handle backspaces in the parser.
+/**
+ * File: Ass-02-Q01.c
  * 
- add <num 1> .. <num N> Sum one or more numbers.	Done
- sub <num 1> <num 2> Subtract two numbers.		Done
- mul <num 1> .. <num N> Multiply one or more numbers.	Done
- div <num 1> <num 2> Divide two numbers.			Done
- debug <on|off> Turn debug messages on or off.
- help [<command>] Display help messages.*   d)
- *
+ * @author Thomas Courtney - c3175353
+ * @author Jeremiah Smith - c3238179
+ * @since 03-05-2019
  */
-
 #include "Ass-02.h"
 #include <ctype.h>
 #include <stdlib.h>
 #ifdef STM32F407xx
+#include <usart.h>
 #endif
 
 #define MAX_STR_LEN 100		// Maximum characters in the input string
-#define CR 13				// Carriage return character
-#define NL 0x0a             //New Line Feed
+#define CR 13			// Carriage return character
+#define NL 0x0a         	//New Line Feed
 
 void serial_string_parser(char**,int*);
 int string_parser(char *inp, char **array_of_words_p[]);
-
-int debug = 0;
-
-/* int main() */
-/* { */
-/* 	CommandLineParserInit(); */
-/* 	while(1) */
-/* 		CommandLineParserProcess(); */
-/* } */
+static int inputLen = 0;	//The number of characters that have been read in from terminal.
 
 void CommandLineParserInit (void)
 {
@@ -41,39 +27,182 @@ void CommandLineParserInit (void)
 	printf ("%s\n", ASS_STRING);
 	printf ("%s\n", VER_STRING);
 	printf ("Command Line Parser Example EDITED\n");
+	printf("> ");
 }
 
-// Check for input and echo back
-void CommandLineParserProcess (void)
+int main()
 {
-	int error = 0;
-	char c;
-	int i, j;
-	char command_line[MAX_STR_LEN + 1];
-	char **array_of_words;
-	int count;
+	while(1)
+	CommandLineParserProcess();
+}
 
-	// Get one line of input
-	printf("> ");
-	i = 0;
-	c = getchar();
+/*
+ * Check for input and echo back
+ * This function operates the command line calculator process on the Windows
+ * command line as well as the Putty interface
+ *
+ * @Params
+ * void
+ *
+ * @Returns
+ * void
+ */
+void CommandLineParserProcess ()
+{
+	int error = 0;		// indicates whether or not an error has been detected
+	char c;			// holds current char read in from the command line
+	int i;
+	static char command_line[MAX_STR_LEN + 1];
+	char **array_of_words;	// holds the array of words entered in from the command line from beginning to carriage return
+	int count;		// a count of the number of words
+	int debug = 0;		// signals whether debug is on or off
+
+
 #ifdef STM32F407xx
-	while (c != CR && i < MAX_STR_LEN) {          // Okay for some red hot reason before when it was printing a NL it would shit itself. What the heck?
-			printf("%c", c);								 // [0x0a] is ugly as shit.
-			if (c < ' ') printf("[0x%02x]", c);
-			if (c != NL) command_line[i] = c;
-			i++;
-			c = getchar();
+
+	int flag = 0; 			//This flag is for saying if a character has been read in.
+	int endInputFlag = 0;		//Indicates if the input has completed being read in.
+
+	if (HAL_UART_Receive (&huart2, &c, 1, 0x0) == HAL_OK){
+		// Get one line of input
+
+
+		//If this is true then a character has been read in.
+		flag = 1;
+		if((c!= CR) && inputLen < MAX_STR_LEN){
+			command_line[inputLen] = c;			//Add char to input string.
+			inputLen++;					//Increment for position of next character.
+		}else{
+			printf("\n");
+			endInputFlag = 1;				//CR read in so input complete.
 		}
-	if (c == CR)
-		printf("\n");
+		printf("%c", c);					//Print what happened to the terminal.
+
+	}
+
+	if(endInputFlag)
+	{		//If the whole string is read in.
+
+			command_line[inputLen] = '\0'; //Set's last char as null.
+
+			// Parse the input and print result
+			count = string_parser(command_line, &array_of_words);
+
+			// ~~~ operations: result calculated below
+			float result = 0;
+
+			// loop over input words
+			for (int i = 0; i < count; i++)
+			{
+
+				// result starts as first number entered
+				if (i == 1){
+					result = strtof(array_of_words[1], NULL);
+				}
+
+				/*  add <num 1> .. <num N> Sum one or more numbers. */
+				else if (strcmp(array_of_words[0], "add") == 0)
+					result += strtof(array_of_words[i], NULL);
+				/* sub <num 1> <num 2> Subtract two numbers. */
+				else if (strcmp(array_of_words[0], "sub") == 0)
+					result -= strtof(array_of_words[i], NULL);
+				/* mul <num 1> .. <num N> Multiply one or more numbers. */
+				else if (strcmp(array_of_words[0], "mul") == 0)
+					result *= strtof(array_of_words[i], NULL);
+				/* div <num 1> <num 2> Divide two numbers.*/
+				else if (strcmp(array_of_words[0], "div") == 0)
+					result /= strtof(array_of_words[i], NULL);
+
+				/* debug <on|off> Turn debug messages on or off. */
+				else if (strcmp(array_of_words[0], "debug") == 0)
+				{
+					if (count == 1)
+					{
+							printf("Debug messages are off\n");
+						if (debug == 1)
+							printf("Debug messages are on\n");
+						return;
+					}
+					else if (strcmp(array_of_words[1], "on") == 0)
+					{
+						debug = 1;
+						printf("Debug messages will now be displayed\n");
+					}
+					else if (strcmp(array_of_words[1], "off") == 0)
+					{
+						debug = 0;
+						printf("Debug messages will not be displayed\n");
+					}
+					else if (debug == 1)
+						printf("Error: Debug commands include 'debug on', 'debug off' and 'debug' (to see the debug status)\n");
+					return;
+				}
+				/* help [<command>] Display help messages.*   d) */
+				else if (strcmp(array_of_words[0], "help") == 0)
+				{
+					// prints help messages for all commands
+					if (count == 1)
+					{
+
+						printf("add - Performs an addition operation on the succeeding numbers\n");
+						printf("sub - Performs a subtraction operation on the succeeding numbers\n");
+						printf("mul - Performs a multiplication operation on the succeeding numbers\n");
+						printf("div - Performs a division operation on the succeeding numbers\n");
+						printf("debug - Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
+						return;
+					}
+					else if (strcmp(array_of_words[1], "add") == 0)
+						printf("Performs an addition operation on the succeeding numbers\n");
+					else if (strcmp(array_of_words[1], "sub") == 0)
+						printf("Performs a subtraction operation on the succeeding numbers\n");
+					else if (strcmp(array_of_words[1], "mul") == 0)
+						printf("Performs a multiplication operation on the succeeding numbers\n");
+					else if (strcmp(array_of_words[1], "div") == 0)
+						printf("Performs a division operation on the succeeding numbers\n");
+					else if (strcmp(array_of_words[1], "debug") == 0)
+						printf("Enter 'debug on' for debugging messages and 'debug off' for no debugging messages\n");
+					else if (debug == 1)
+						printf("No help for '%s'", array_of_words[1]);
+					return;
+				}
+				// invalid command
+				else if (debug == 1)
+				{
+					printf("'%s' is an invalid command, type command 'help' to see a list of available commands\n", array_of_words[0]);
+					return;
+				}
+
+			if (debug == 1 && i >= 1)
+				for (int a = 0; a < strlen(array_of_words[i]); a++)
+				{
+					if (!isdigit(array_of_words[i][a]))
+					{
+						printf("Please enter numbers after a calculator operation to see valid results\n");
+						error = 1;
+						return;
+					}
+				}
+		}
+
+			if (error == 0)
+
+				printf("Result : %g\n\n", result);
+				printf("> ");
+				inputLen = 0;
+			if (count != 0) {
+				free(array_of_words[0]);
+				free(array_of_words);
+			}
+
+	}
 #else
+	c = getchar();	//Moved to here so that getChar() only happens in windows.
 	while (c != '\n' && i < MAX_STR_LEN) {
 		command_line[i] = c;
 		i++;
 		c = getchar();
 	}
-#endif
+
 	command_line[i] = 0;
 
 	// Parse the input and print result
@@ -183,6 +312,8 @@ void CommandLineParserProcess (void)
 		free(array_of_words[0]);
 		free(array_of_words);
 	}
+
+#endif
 }
 
 /* This function is Q5 of A1 */

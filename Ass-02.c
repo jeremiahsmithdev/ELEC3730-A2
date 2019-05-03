@@ -1,12 +1,14 @@
-/*        $Id: Ass-02.c 1592 2019-02-05 14:38:48Z Peter $
- *  $Revision: 1592 $
- *      $Date: 2019-02-06 01:38:48 +1100 (Wed, 06 Feb 2019) $
- *    $Author: Peter $
+/**
+ * File: Ass-02-Q01.c
+ * 
+ * @author Thomas Courtney - c3175353
+ * @author Jeremiah Smith - c3238179
+ * @since 03-05-2019
  */
 
 #include "Ass-02.h"
 
-//
+
 // REPLACE THE EXAMPLE CODE WITH YOUR CODE 
 //
 
@@ -16,7 +18,7 @@ void Ass_02_Main (void){
 		uint16_t i = 0;
 	#endif
 
-//	CommandLineParserInit ();
+	CommandLineParserInit ();
 
 	#ifdef STM32F407xx
 		CalculatorInit ();
