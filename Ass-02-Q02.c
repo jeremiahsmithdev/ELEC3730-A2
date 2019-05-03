@@ -629,7 +629,7 @@ void modifyMathString(int mode){
 		printf("The target position: %d \n", targetPos);
 
 		//get characters after deleted char. i is already initialized and sitting at where the position of deleted char.
-		for(int i = targetPos+1; i< mathStrLen; i++){
+		for(int i = targetPos+1; i<= mathStrLen; i++){
 			mathString[i-1] = tempString[i];
 		}
 
