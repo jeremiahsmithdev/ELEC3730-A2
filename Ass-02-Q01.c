@@ -26,7 +26,6 @@
 void serial_string_parser(char**,int*);
 int string_parser(char *inp, char **array_of_words_p[]);
 static int inputLen = 0;													//The number of characters that have been read in from terminal.
-int debug = 0;
 
 
 /* int main() */
@@ -47,7 +46,7 @@ void CommandLineParserInit (void)
 }
 
 // Check for input and echo back
-void CommandLineParserProcess (void)
+void CommandLineParserProcess ()
 {
 	int error = 0;
 	char c;
@@ -55,7 +54,7 @@ void CommandLineParserProcess (void)
 	static char command_line[MAX_STR_LEN + 1];
 	char **array_of_words;
 	int count;
-
+	int debug = 0;
 
 
 #ifdef STM32F407xx
@@ -119,7 +118,6 @@ void CommandLineParserProcess (void)
 				{
 					if (count == 1)
 					{
-						if (debug == 0)
 							printf("Debug messages are off\n");
 						if (debug == 1)
 							printf("Debug messages are on\n");

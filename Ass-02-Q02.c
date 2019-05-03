@@ -337,7 +337,7 @@ void CalculatorInit (void)
 }
 
 /* Handles user inputs and passes the math expression as a string to a parser which returns result of mathematical expression. */
-void CalculatorProcess (void)
+void CalculatorProcess ()
 {
 
 
@@ -352,6 +352,7 @@ void CalculatorProcess (void)
     {
       if ((display.y >= 49) && (display.y < 96)) 			/* 7 */
       {
+
     	  updateDisplay("7");
     	  HAL_Delay(100);
       }
@@ -404,7 +405,7 @@ void CalculatorProcess (void)
 			   ClearTextBox();
 			   HAL_Delay(100);
 		   }else{
-			   deleteKey();									/* DEL */
+			   if(charRight()) deleteKey();									/* DEL */
 			   HAL_Delay(100);
 		   }
 	   }
@@ -487,7 +488,7 @@ void CalculatorProcess (void)
 int charRight(){
 	int flag = 0;
 	//If cursor not in last position and str is shorter than screen.
-	if(cursorPos != 13 && globalDisplayPointer != mathString){
+	if(absolutePosition() != mathStrLen){
 		flag = 1;
 	}
 	//else there's nothing to the right.
@@ -520,12 +521,15 @@ void deleteKey(){
 
 		printf("Before deletion: %s\n", mathString);
 
-		modifyMathString(1);
+		modifyMathString(1);								//Simply modifies the string.
 
 		diff = mathStrLen - MAX_DISP_STR;
 //
 		if(diff <= 0){										//If the diff < 0 then the length of string is less than display so show whole string.
-//			cursorPos = mathStrLen-1;
+			if(cursorPos >= mathStrLen && cursorPos != 0){				//If delete character is last character.
+				cursorPos = mathStrLen - 1 ;
+			}
+
 ////			printf("making display ptr = mathString \n");
 			globalDisplayPointer = mathString;				//This assignment means that the whole string will be shown from the beginning.
 ////			printf("String to be displayed: %s \n", globalDisplayPointer);
@@ -626,6 +630,7 @@ void modifyMathString(int mode){
 			mathString[i] = tempString[i];					//Copy old characters into string.
 			targetPos = i;
 		}
+
 		printf("The target position: %d \n", targetPos);
 
 		//get characters after deleted char. i is already initialized and sitting at where the position of deleted char.

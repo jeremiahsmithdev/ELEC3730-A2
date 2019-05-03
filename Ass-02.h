@@ -15,6 +15,8 @@
 #include "openx07v_c_lcd.h"
 #include "touch_panel.h"
 #include "main.h"
+
+
 #else
 
 #if WINNT
@@ -39,6 +41,7 @@
 // Assignment and version strings
 #define ASS_STRING "ELEC3730-2019 Semester 1 Assignment 2"
 #define VER_STRING "Ver: 01 $Rev: 1592 $"
+
 
 
 // Assignment main
