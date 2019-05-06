@@ -29,12 +29,12 @@ void CommandLineParserInit (void)
 	printf ("Command Line Parser Example EDITED\n");
 	printf("> ");
 }
-
-int main()
-{
-	while(1)
-	CommandLineParserProcess();
-}
+//
+//int main()
+//{
+//	while(1)
+//	CommandLineParserProcess();
+//}
 
 /*
  * Check for input and echo back
